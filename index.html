@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>小陈的秘密基地</title>
+  <!-- 童话字体：国内可访问 CDN（站酷快乐体 / 站酷小薇 / Fredoka）。若加载失败，CSS 字体栈会回退到系统圆体 -->
+  <link rel="stylesheet" href="https://fonts.font.im/css?family=ZCOOL+KuaiLe|ZCOOL+XiaoWei|Fredoka&display=swap">
+<style>
+/* =========================================================
+   全局变量
+   ========================================================= */
+:root{
+  --text:#4a3b5c;          /* 主文字：深紫 */
+  --text-soft:#7a6b8a;     /* 副文字 */
+  --glass:rgba(255,255,255,0.70);
+  --glass-2:rgba(255,255,255,0.55);
+  --glass-border:rgba(255,255,255,0.9);
+  --shadow:0 20px 50px rgba(120,150,180,0.15);
+  --radius:24px;
+  --accent:#ff8fb1; --accent2:#b388ff;
+  --btn-red1:#ee1515; --btn-red2:#b00e0e;
+  --btn-yel1:#ffd93d; --btn-yel2:#ff9f1c;
+  --font-title:'ZCOOL KuaiLe','Yuanti SC','YouYuan','STHupo','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-body:'ZCOOL XiaoWei','Yuanti SC','YouYuan','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-num:'Fredoka','Comic Sans MS','Yuanti SC',sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0;}
+body{
+  font-family:var(--font-body); line-height:1.8;
+  color:var(--text);
+  background:linear-gradient(180deg,#c9e4ff 0%,#dfeaff 30%,#fbf3ff 60%,#fff9e6 100%);
+  background-attachment:fixed;
+  overflow:hidden;
+}
+
+/* =========================================================
+   一、全局背景：古早水彩梦幻风景（纯 CSS + 内联 SVG + Emoji）
+   ========================================================= */
+#bg{position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
+  background:url('bg.jpg') center center / cover no-repeat; background-color:#cfe3ff;}
+/* 背景柔光遮罩 + 高斯模糊（退成朦胧水彩远景，和蛋糕卡片区分开） */
+#bg{filter:blur(7px) brightness(1.05); transform:scale(1.08);}
+#bg::after{content:""; position:absolute; inset:0; background:rgba(255,255,255,0.55); pointer-events:none;}
+/* 闪烁星星 + 飘落花瓣（在遮罩之上，保持清晰） */
+#bgStars{position:fixed; inset:0; z-index:3; pointer-events:none; overflow:hidden;}
+.star{position:absolute; font-size:14px; color:#ffd93d; text-shadow:0 0 6px rgba(255,217,61,0.85);
+  animation:starTw2 3s ease-in-out infinite;}
+.star.w{color:#fff; text-shadow:0 0 6px rgba(255,255,255,0.9);}
+@keyframes starTw2{0%,100%{opacity:.2; transform:scale(.6) rotate(0);}50%{opacity:1; transform:scale(1.1) rotate(20deg);}}
+.petal-g{position:absolute; top:-30px; animation:fallG linear infinite; will-change:transform; opacity:.8;}
+@keyframes fallG{to{transform:translateY(112vh) rotate(360deg); opacity:.12;}}
+
+/* =========================================================
+   二、屏幕切换
+   ========================================================= */
+.screen{position:fixed; inset:0; z-index:5; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:18px; overflow:auto;
+  opacity:0; visibility:hidden; transition:opacity .55s ease, visibility .55s;}
+.screen.active{opacity:1; visibility:visible;}
+
+/* =========================================================
+   三、通用毛玻璃卡片 / 按钮
+   ========================================================= */
+.card{background:var(--glass); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:22px 24px;
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1.5px solid var(--glass-border);}
+.btn{border:none; cursor:pointer; color:#fff; font-family:var(--font-title); font-size:17px; font-weight:400; letter-spacing:2px;
+  padding:13px 28px; border-radius:999px;
+  background:linear-gradient(135deg,var(--btn-red1),var(--btn-red2));
+  box-shadow:0 8px 20px rgba(238,21,21,0.35), 0 2px 0 rgba(150,0,0,0.4);
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(1px); box-shadow:0 3px 8px rgba(238,21,21,0.35);}
+.btn.ghost{background:linear-gradient(135deg,var(--btn-yel1),var(--btn-yel2));
+  color:#6b3e00; box-shadow:0 8px 20px rgba(255,159,28,0.3), 0 2px 0 rgba(180,110,0,0.35);}
+.btn.ghost:active{transform:translateY(1px); box-shadow:0 3px 8px rgba(255,159,28,0.3);}
+.topbar{position:fixed; top:14px; left:14px; right:14px; z-index:30;
+  display:flex; justify-content:space-between; align-items:center; pointer-events:none;}
+.topbar button{pointer-events:auto;}
+.back,.bgm-toggle{border:none; cursor:pointer; color:var(--text); font-family:var(--font-title); font-size:14px; font-weight:400; letter-spacing:1px;
+  background:rgba(255,255,255,0.6); border-radius:999px; padding:8px 16px;
+  box-shadow:var(--shadow); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,0.85);}
+.bgm-toggle.off{background:rgba(255,255,255,0.4); color:var(--text-soft);}
+.title{font-family:var(--font-title); font-size:clamp(28px,4.4vw,40px); font-weight:400; text-align:center; margin:6px 0 16px;
+  color:var(--text); letter-spacing:3px; text-shadow:0 1px 0 rgba(255,255,255,.5);}
+.sub{text-align:center; color:var(--text-soft); font-size:14px; margin-top:10px;}
+
+/* =========================================================
+   第一页：密码
+   ========================================================= */
+#screen-password .card{width:min(360px,90vw); text-align:center; position:relative; z-index:2; padding:58px 48px 44px; margin-top:40px;}
+#screen-password h1{font-family:var(--font-title); font-size:clamp(26px,4vw,32px); margin:4px 0 18px; font-weight:400;
+  color:var(--text); letter-spacing:3px; text-shadow:0 1px 0 rgba(255,255,255,.5);}
+#pwInput{width:100%; font-family:var(--font-num); font-size:18px; padding:14px 16px; border-radius:16px;
+  border:1.5px solid rgba(179,136,255,0.4); background:rgba(234,255,238,0.65);
+  outline:none; text-align:center; color:var(--text); letter-spacing:2px;}
+#pwInput:focus{border-color:var(--accent2); box-shadow:0 0 0 4px rgba(255,217,61,0.35);}
+.pwHint{color:var(--text-soft); font-size:13px; margin:12px 0 18px;}
+.pwErr{color:#e0556e; font-size:13px; min-height:18px; margin-top:10px;}
+
+/* ===== 密码页装饰：皇冠 / 雪花 / 星光 / 宝可梦水印 ===== */
+#screen-password{overflow:hidden;}
+.pw-deco{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+
+/* 皇冠（视觉焦点） */
+.crown{position:absolute; top:-54px; left:50%; transform:translateX(-50%); width:88px; height:74px; z-index:3;}
+.crown-inner{position:relative; width:100%; height:100%; animation:crownFloat 4.5s ease-in-out infinite;
+  filter:drop-shadow(0 3px 8px rgba(255,200,40,0.55));}
+.crown-shape{position:absolute; left:0; right:0; top:0; height:54px;
+  background:linear-gradient(135deg,#FFEAA7 0%,#FFD700 48%,#F0C040 100%);
+  clip-path:polygon(0% 100%,0% 56%,15% 26%,33% 52%,50% 6%,67% 52%,85% 26%,100% 56%,100% 100%);}
+.crown-base{position:absolute; left:-3px; right:-3px; bottom:0; height:18px; border-radius:9px;
+  background:linear-gradient(135deg,#FFE07A,#E8B62E); box-shadow:0 2px 5px rgba(200,150,20,.4);}
+.crown-gem{position:absolute; left:50%; top:28px; width:12px; height:12px; transform:translateX(-50%) rotate(45deg);
+  background:radial-gradient(circle at 35% 35%,#fff,#ff9ec4 60%,#e06aa0); border-radius:2px;
+  box-shadow:0 0 6px rgba(255,150,200,.7);}
+.crown-sparkle{position:absolute; left:50%; bottom:-15px; width:14px; height:14px; transform:translateX(-50%);
+  background:#fff; clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);
+  animation:twinkle 2.2s ease-in-out infinite;}
+@keyframes crownFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+
+/* 雪花（纯 CSS 冰晶） */
+.snowflake{position:absolute; width:var(--s,32px); height:var(--s,32px); color:#cfe8ff; opacity:.5;
+  animation:sfSpin 24s linear infinite; animation-delay:var(--d,0s);
+  filter:drop-shadow(0 0 2px rgba(255,255,255,.65));}
+.snowflake .sf-inner{position:relative; width:100%; height:100%; animation:sfFloat 7s ease-in-out infinite; animation-delay:var(--d,0s);}
+.snowflake i{position:absolute; left:50%; top:2%; width:3px; height:96%; margin-left:-1.5px;
+  background:currentColor; border-radius:3px; transform-origin:center;}
+.snowflake i::before,.snowflake i::after{content:""; position:absolute; left:50%; top:16%; width:3px; height:34%;
+  background:currentColor; border-radius:3px; transform-origin:top center;}
+.snowflake i::before{transform:translateX(-50%) rotate(38deg);}
+.snowflake i::after{transform:translateX(-50%) rotate(-38deg);}
+.snowflake i:nth-child(1){transform:rotate(0deg);}
+.snowflake i:nth-child(2){transform:rotate(60deg);}
+.snowflake i:nth-child(3){transform:rotate(120deg);}
+@keyframes sfSpin{to{transform:rotate(360deg);}}
+@keyframes sfFloat{0%,100%{transform:translateY(-6px);}50%{transform:translateY(6px);}}
+
+/* 星光 */
+.pw-star{position:absolute; width:var(--sz,4px); height:var(--sz,4px); border-radius:50%;
+  background:var(--c,#fff3c4); box-shadow:0 0 6px 1px var(--c,#fff3c4);
+  animation:twinkle 3.4s ease-in-out infinite; animation-delay:var(--d,0s);}
+@keyframes twinkle{0%,100%{opacity:.15; transform:scale(.7);}50%{opacity:1; transform:scale(1.15);}}
+
+/* 宝可梦剪影水印 */
+.wm-ball{position:absolute; width:130px; height:130px; border-radius:50%; opacity:.12;
+  background:linear-gradient(#ff8a8a 0 50%, #ffffff 50% 100%);}
+.wm-ball::before{content:""; position:absolute; left:0; right:0; top:50%; height:9px; transform:translateY(-50%); background:#3a3a3a;}
+.wm-ball::after{content:""; position:absolute; left:50%; top:50%; width:28px; height:28px; transform:translate(-50%,-50%);
+  border-radius:50%; background:#fff; border:6px solid #3a3a3a;}
+.wm-pika{position:absolute; width:120px; height:110px; opacity:.1;}
+.wm-pika .ear{position:absolute; top:0; width:26px; height:92px; background:#ffd84d; border-radius:50% 50% 42% 42%;}
+.wm-pika .ear.l{left:28px; transform:rotate(-20deg); transform-origin:bottom center;}
+.wm-pika .ear.r{right:28px; transform:rotate(20deg); transform-origin:bottom center;}
+
+@media (max-width:768px){
+  #screen-password .card{padding:46px 26px 34px; margin-top:36px;}
+  .crown{top:-46px; width:76px; height:64px;}
+}
+
+/* =========================================================
+   第二页：生日蛋糕
+   ========================================================= */
+#confetti{position:absolute; left:50%; top:42%; width:0; height:0; z-index:6; pointer-events:none;}
+.ribbon{position:absolute; left:0; top:0; width:10px; height:16px; border-radius:3px;
+  animation:ribbonFly 2s ease-out forwards;}
+@keyframes ribbonFly{
+  0%{transform:translate(-50%,-50%) translate(0,0) rotate(0); opacity:1;}
+  100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) rotate(var(--rot)); opacity:0;}
+}
+/* 蛋糕整体尺寸由一个变量 --cw（蛋糕宽度）统一控制，各部件按比例缩放，
+   这样在手机窄屏上整只蛋糕会等比缩小，永远不会超出卡片和屏幕 */
+.cake-wrap{position:relative; margin:10px auto 0;
+  --cw:min(400px, calc(90vw - 100px));   /* PC：卡片内可用宽度 */
+  width:var(--cw);}
+.plate{width:var(--cw); height:calc(var(--cw) * 0.06); margin:6px auto 0; border-radius:50%;
+  background:linear-gradient(180deg,#ffffff,#e8f3ff); box-shadow:0 20px 40px rgba(180,210,240,0.25);}
+.tier{margin:0 auto; border-radius:calc(var(--cw) * 0.045) calc(var(--cw) * 0.045) calc(var(--cw) * 0.035) calc(var(--cw) * 0.035);
+  position:relative;
+  background:linear-gradient(180deg,#ffffff 0%,#f0f8ff 55%,#d0e8ff 100%);
+  box-shadow:0 16px 34px rgba(180,210,240,0.22); border:1px solid rgba(255,255,255,0.9);}
+.tier.bottom{width:calc(var(--cw) * 0.85); height:calc(var(--cw) * 0.24); margin-top:calc(var(--cw) * 0.025);}
+.tier.top{width:calc(var(--cw) * 0.56); height:calc(var(--cw) * 0.185); margin-top:calc(var(--cw) * 0.005); z-index:2;}
+/* 奶油波浪边（纯 CSS 圆角拼合，蓬松轻盈） */
+.cream-wave{display:flex; justify-content:center; gap:calc(var(--cw) * 0.0125);
+  margin-top:calc(var(--cw) * -0.04); position:relative; z-index:3;}
+.cream-wave div{width:calc(var(--cw) * 0.105); height:calc(var(--cw) * 0.075); background:#ffffff; border-radius:50%;
+  box-shadow:0 5px 12px rgba(180,210,240,0.22), inset 0 -3px 6px rgba(204,229,255,0.55);}
+.cream-wave.alt div{background:#e6f3ff;}
+.deco{position:absolute; width:calc(var(--cw) * 0.085); height:calc(var(--cw) * 0.085); user-select:none;
+  filter:drop-shadow(0 2px 3px rgba(120,160,200,.25));}
+.deco svg{width:100%; height:100%; display:block;}
+#candles{display:flex; gap:calc(var(--cw) * 0.045); justify-content:center;
+  margin-bottom:calc(var(--cw) * 0.01); position:relative; z-index:4;}
+.candle{display:flex; flex-direction:column; align-items:center; cursor:pointer; position:relative;}
+.stick{width:max(6px, calc(var(--cw) * 0.02)); height:calc(var(--cw) * 0.16); margin:0 auto;
+  border-radius:calc(var(--cw) * 0.01);
+  background:repeating-linear-gradient(180deg,#ffffff 0 11px,#cce5ff 11px 22px);
+  box-shadow:0 2px 6px rgba(180,210,240,0.3); border:1px solid rgba(255,255,255,0.85);}
+.flame{width:max(9px, calc(var(--cw) * 0.03)); height:max(15px, calc(var(--cw) * 0.05));
+  margin-bottom:calc(var(--cw) * -0.0075);
+  background:radial-gradient(circle at 50% 65%, #fff9e6 0%, #ffd93d 55%, #ff9f1c 100%);
+  border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow:0 0 12px rgba(255,196,80,0.85);
+  transform-origin:bottom; animation:flicker .28s infinite alternate;}
+@keyframes flicker{from{transform:scaleY(1) rotate(-3deg);}to{transform:scaleY(1.18) rotate(3deg);}}
+.candle.out .flame{opacity:0; transform:scale(0); transition:.3s;}
+.smoke{position:absolute; top:-8px; left:50%; width:7px; height:7px; border-radius:50%;
+  background:rgba(170,170,170,.55); animation:smoke 1.2s ease-out forwards;}
+@keyframes smoke{to{transform:translateY(-42px) translateX(8px) scale(2.2); opacity:0;}}
+
+/* =========================================================
+   蛋糕页：内容装进大尺寸毛玻璃卡片
+   ========================================================= */
+.cake-card{width:min(90vw,700px); padding:60px 50px; margin:auto;
+  background:rgba(255,255,255,0.88); border-radius:40px;
+  box-shadow:0 30px 80px rgba(150,180,220,0.15); border:1px solid #fff;
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  display:flex; flex-direction:column; align-items:center; text-align:center;}
+/* 标题：字号随屏幕宽度收缩 + 强制不换行，保证手机端和 PC 端都是「一行」 */
+#screen-cake .title{font-size:min(56px, 7.4vw); color:#2c3e50; font-weight:600;
+  margin-bottom:calc(var(--cake-gap, 48px)); white-space:nowrap; line-height:1.25;}
+#screen-cake .sub{font-size:18px; color:#5a5a6a; margin-top:56px; line-height:1.8;}
+@media (max-width:540px){
+  /* 手机端卡片内边距变小，蛋糕可用宽度相应变大（卡片 90vw 减去左右各 22px） */
+  .cake-wrap{--cw:min(400px, calc(90vw - 48px));}
+  .cake-card{padding:36px 20px;}
+  #screen-cake .title{--cake-gap:26px;}
+  #screen-cake .sub{margin-top:30px; font-size:16px;}
+}
+
+/* =========================================================
+   过渡页
+   ========================================================= */
+.menu-grid{display:grid; grid-template-columns:1fr 1fr; gap:26px; width:min(460px,92vw); margin:10px auto;}
+.menu-btn{display:flex; flex-direction:column; align-items:center; gap:10px;
+  padding:32px 14px; border-radius:var(--radius); cursor:pointer;
+  background:var(--glass); box-shadow:var(--shadow); border:1.5px solid var(--glass-border);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  transition:transform .25s ease, box-shadow .25s ease; font-family:var(--font-title); font-weight:400; color:var(--text); letter-spacing:3px;}
+.menu-btn:hover{transform:translateY(-5px); box-shadow:0 26px 60px rgba(120,150,180,0.22);}
+.menu-btn .ico{font-size:34px;}
+
+/* =========================================================
+   模块一：观赏烟花
+   ========================================================= */
+#screen-fireworks{justify-content:flex-start;}
+#fwSky{position:absolute; inset:0; z-index:0; overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(120,140,220,0.22), transparent 60%),
+    linear-gradient(180deg, #0a0e23 0%, #141a3a 50%, #1d2350 100%);}
+.fw-star{position:absolute; border-radius:50%; background:#fff;
+  box-shadow:0 0 6px rgba(255,255,255,0.9); animation:fwTw 2.6s ease-in-out infinite;}
+@keyframes fwTw{0%,100%{opacity:.25; transform:scale(.7);}50%{opacity:1; transform:scale(1.15);}}
+.fw-shoot{position:absolute; width:120px; height:2px; border-radius:2px; opacity:0;
+  background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95));
+  transform:rotate(25deg); animation:fwShoot 5s ease-in infinite;}
+@keyframes fwShoot{
+  0%{opacity:0; transform:translate(0,0) rotate(25deg);}
+  6%{opacity:1;} 16%{opacity:1;}
+  26%{opacity:0; transform:translate(260px,140px) rotate(25deg);}
+  100%{opacity:0; transform:translate(260px,140px) rotate(25deg);}
+}
+#fwCanvas{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
+#screen-fireworks .content{position:relative; z-index:2; width:100%; display:flex;
+  flex-direction:column; align-items:center; padding-top:70px;}
+.fw-tip{color:var(--text); background:rgba(255,255,255,0.62); border:1.5px solid rgba(255,255,255,0.85);
+  padding:8px 18px; border-radius:999px; box-shadow:var(--shadow); font-family:var(--font-title); font-weight:400; font-size:15px; letter-spacing:2px; margin-bottom:18px;}
+
+/* =========================================================
+   模块二：今日运势（抽签）
+   ========================================================= */
+#tube{width:100px; height:128px; margin:0 auto 6px; position:relative; overflow:hidden;
+  border-radius:50px; border:4px solid #fff;
+  background:linear-gradient(#ff5b5b 0 48%, #f2f2f2 52% 100%);
+  box-shadow:var(--shadow);}
+#tube::before{content:""; position:absolute; left:0; right:0; top:50%; height:14px;
+  background:#2b2b2b; transform:translateY(-50%);}
+#tube::after{content:""; position:absolute; left:50%; top:50%; width:42px; height:42px;
+  border-radius:50%; background:#fff; border:7px solid #2b2b2b; transform:translate(-50%,-50%);}
+#tube.shake{animation:shake 1.2s ease;}
+@keyframes shake{0%,100%{transform:rotate(0);}15%{transform:rotate(-10deg);}
+  30%{transform:rotate(10deg);}45%{transform:rotate(-8deg);}60%{transform:rotate(8deg);}
+  75%{transform:rotate(-4deg);}90%{transform:rotate(4deg);}}
+.fortune-card{width:min(90vw,600px); max-height:88vh; overflow:auto; text-align:center;
+  background:rgba(255,255,255,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,1); border-radius:32px;
+  box-shadow:0 20px 60px rgba(150,180,220,0.18); padding:48px 40px; position:relative;}
+.fortune-card .title{font-size:32px; color:#2c3e50; margin-bottom:6px; font-family:var(--font-title); font-weight:400; letter-spacing:3px;}
+.fortune-sub{font-size:14px; color:var(--text-soft); margin:0 0 14px; font-family:var(--font-body);}
+.fortune-msg{font-size:14px; color:#e08aa6; min-height:18px; margin-top:12px; font-family:var(--font-title); letter-spacing:1px;}
+.fdraw-btn{margin-top:16px; background:linear-gradient(135deg,#ff6b6b,#ee5a24); color:#fff;
+  border:none; padding:12px 44px; border-radius:999px; font-family:var(--font-title); font-size:18px; letter-spacing:3px;
+  box-shadow:0 8px 22px rgba(238,90,36,0.35); cursor:pointer;}
+.fdraw-btn:hover{filter:brightness(1.05);}
+.fhistory-btn{margin-top:14px; background:linear-gradient(135deg,#ffd93d,#ff9f1c); color:#6b3e00;
+  border:none; padding:10px 28px; border-radius:999px; font-family:var(--font-title); font-size:15px; letter-spacing:2px;
+  box-shadow:0 6px 16px rgba(255,159,28,0.3); cursor:pointer;}
+.fhistory-btn:hover{filter:brightness(1.05);}
+.fcard{width:100%; text-align:left; margin-top:18px; box-sizing:border-box;
+  transform:scale(.85); opacity:0; transition:transform .4s ease, opacity .4s ease;
+  background:rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.9); border-radius:22px; padding:20px 22px;}
+.fcard.show{transform:scale(1); opacity:1;}
+.flevel{font-size:30px; font-weight:400; text-align:center; margin-bottom:12px; font-family:var(--font-title); letter-spacing:2px;
+  text-shadow:0 2px 12px rgba(255,255,255,.7);}
+.frow{display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:15px; margin:8px 0;
+  color:var(--text); border-bottom:1px dashed rgba(150,160,180,0.3); padding-bottom:7px;}
+.frow .flabel{color:var(--text-soft); font-family:var(--font-title); letter-spacing:1px; flex:none;}
+.frow .fval{font-weight:400; color:#2c3e50; text-align:right;}
+.fword{font-size:14px; color:#7a5a8a; margin:14px 2px 4px; line-height:1.7; font-family:var(--font-body); text-align:center;}
+.fcard .fbts{display:flex; justify-content:center; margin-top:4px;}
+.hist-top{display:flex; align-items:center; gap:8px; margin-bottom:4px;}
+.hist-top b{color:var(--accent2);}
+.hist-time{font-size:11px; color:var(--text-soft); font-family:var(--font-num);}
+.hist-del{margin-left:auto; width:20px; height:20px; border-radius:50%; border:none; cursor:pointer;
+  background:rgba(220,120,140,0.18); color:#c65b5b; font-size:13px; line-height:1; font-family:var(--font-num);}
+.hist-del:hover{background:rgba(220,120,140,0.32);}
+.hist-sum{font-family:var(--font-title); font-size:14px; margin-bottom:2px;}
+.hist-sub{font-size:12.5px; color:var(--text); margin:1px 0;}
+.hist-word{font-size:12.5px; color:var(--text-soft); margin-top:4px; line-height:1.6; font-family:var(--font-body);}
+
+/* =========================================================
+   模块三：小小相册
+   ========================================================= */
+.album-stage{position:relative; width:min(720px,94vw);}
+.branch{position:absolute; width:66px; height:66px; z-index:3; pointer-events:none; user-select:none;
+  transform-origin:50% 88%; animation:sway 4.5s ease-in-out infinite;}
+.branch .bw{display:block; width:100%; height:100%;}
+.branch svg{width:100%; height:100%; display:block; filter:drop-shadow(0 2px 3px rgba(120,140,120,.25));}
+@keyframes sway{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+#petals{position:absolute; inset:0; overflow:hidden; z-index:0; pointer-events:none;}
+.petal{position:absolute; top:-30px; font-size:16px; animation:fall linear infinite;}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg); opacity:.2;}}
+.album{display:flex; gap:14px; justify-content:center; position:relative; z-index:2;
+  perspective:1200px; margin-top:8px;}
+.page{flex:1; max-width:300px; background:var(--glass); border-radius:18px;
+  padding:14px; display:grid; grid-template-rows:1fr 1fr; gap:12px;
+  box-shadow:var(--shadow); border:1.5px solid var(--glass-border);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  transition:transform .5s ease, opacity .5s ease;}
+.page.flip{transform:rotateY(-12deg); opacity:.4;}
+.photo{position:relative; border-radius:14px; overflow:hidden; cursor:pointer;
+  background:#fff; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;}
+.photo img{width:100%; height:100%; object-fit:cover; display:block;}
+/* 上传照片的删除按钮（初始 6 张不可删） */
+.pdel{position:absolute; top:7px; right:7px; z-index:6; width:26px; height:26px; line-height:1;
+  display:flex; align-items:center; justify-content:center; padding:0;
+  border:none; border-radius:50%; background:rgba(255,107,107,0.92); color:#fff;
+  font-size:17px; cursor:pointer; box-shadow:0 2px 8px rgba(180,60,60,0.35);
+  opacity:0; transition:opacity .18s ease, transform .18s ease;}
+.photo:hover .pdel{opacity:1;}
+.pdel:hover{background:#ff4757; transform:scale(1.1);}
+.pdel:active{transform:scale(.94);}
+@media (hover:none){ .pdel{opacity:1;} }  /* 触屏设备常显，保证能点到 */
+.album-bar{display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap;}
+.page-ind{color:var(--text-soft); font-size:13px; margin-top:10px; text-align:center;}
+
+/* =========================================================
+   模块四：记录本（个人博客 / 传统论坛排版）
+   ========================================================= */
+#screen-record{justify-content:flex-start; align-items:stretch; padding:74px 24px 48px; overflow:auto;}
+#bookStars{position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; border-radius:24px;}
+.star2{position:absolute; color:#ffd93d; animation:starTw 3s ease-in-out infinite;}
+@keyframes starTw{0%,100%{opacity:.3; transform:scale(.7);}50%{opacity:1; transform:scale(1.1);}}
+
+/* 三栏博客布局 */
+.blog-shell{position:relative; z-index:1; width:100%; max-width:1400px; margin:0 auto;
+  display:grid; grid-template-columns:280px 1fr 300px; gap:32px; align-items:start;
+  font-family:var(--font-body); color:#2c3e50; line-height:1.8;}
+.blog-side{display:flex; flex-direction:column; gap:24px;}
+.blog-main{min-width:0;}
+
+/* 通用毛玻璃卡片 */
+.blog-card{background:rgba(255,255,255,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,1); border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.05); padding:24px;}
+.side-title{font-family:var(--font-title); font-size:17px; color:#2c3e50; letter-spacing:2px; margin-bottom:14px; font-weight:400;}
+
+/* 左栏：博主档案 */
+.author-card{display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; position:relative;}
+.author-avatar{width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #fff;
+  box-shadow:0 6px 16px rgba(150,180,220,0.35); cursor:pointer; background:#eef5ff; flex:none;}
+.author-name{font-family:var(--font-title); font-size:20px; font-weight:500; color:#2c3e50; cursor:pointer; letter-spacing:1px;}
+.author-sig{font-size:14px; color:#7a8a9a; cursor:pointer; line-height:1.7; max-width:100%;}
+.mini-btn{font-size:13px; padding:5px 16px; border:1.5px solid rgba(179,136,255,0.5); border-radius:999px; cursor:pointer;
+  background:rgba(255,255,255,0.7); color:#7b5cff; font-family:var(--font-title); font-weight:400; letter-spacing:1px;}
+.mini-btn:hover{background:#eef6ff;}
+
+/* 左栏：时光轴 */
+.timeline{list-style:none; margin:0; padding:0 0 0 20px; position:relative;}
+.timeline::before{content:""; position:absolute; left:6px; top:6px; bottom:10px; width:2px;
+  background:linear-gradient(180deg,#cfe0ff,#e6ecf7); border-radius:2px;}
+.timeline li{position:relative; padding:0 0 18px 16px;}
+.timeline li:last-child{padding-bottom:0;}
+.timeline .dot{position:absolute; left:-20px; top:4px; width:12px; height:12px; border-radius:50%;
+  background:#bcd4ff; border:2px solid #fff; box-shadow:0 1px 4px rgba(120,150,200,.5);}
+.tl-date{font-size:14px; color:#2c3e50; font-weight:500;}
+.tl-badge{display:inline-block; margin:5px 0 2px; font-size:13px; color:#fff;
+  background:linear-gradient(135deg,#7db3ff,#a78bff); padding:3px 12px; border-radius:999px; font-family:var(--font-title); letter-spacing:1px;}
+.tl-badge b{color:#fff;}
+.tl-note{font-size:13px; color:#7a8a9a; line-height:1.7; margin-top:2px;}
+.tl-right{display:block; font-size:12px; color:#9aa7b8; margin-top:3px;}
+
+/* 中栏：发表区 */
+.post-box{margin-bottom:24px;}
+.post-title{font-family:var(--font-title); font-size:20px; color:#2c3e50; letter-spacing:2px; margin-bottom:14px; font-weight:400;}
+#postText{width:100%; min-height:120px; resize:vertical; border:1px solid rgba(150,170,200,0.5);
+  border-radius:16px; padding:14px 16px; font-size:15px; background:rgba(255,255,255,0.7); color:#2c3e50;
+  outline:none; font-family:var(--font-body); line-height:1.8;}
+#postText:focus{border-color:#bcd4ff; box-shadow:0 0 0 4px rgba(188,212,255,0.3);}
+.post-actions{display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;}
+.pick-btn{border:none; background:linear-gradient(135deg,var(--btn-yel1),var(--btn-yel2)); color:#6b3e00;
+  padding:8px 18px; border-radius:999px; cursor:pointer; font-size:15px; font-family:var(--font-title); font-weight:400; letter-spacing:1px;
+  box-shadow:0 4px 10px rgba(255,159,28,0.25);}
+.pick-btn:hover{filter:brightness(1.04);}
+.tool-btn{font-size:14px; border:1.5px solid rgba(179,136,255,0.5); background:rgba(255,255,255,0.7); color:#7b5cff;
+  padding:8px 14px; border-radius:999px; cursor:pointer; font-family:var(--font-title); font-weight:400; letter-spacing:1px;}
+.tool-btn:hover{background:#eef6ff;}
+.max-hint{font-size:13px; color:#7a8a9a;}
+.post-count{font-size:13px; color:#7a8a9a;}
+.pub-btn{margin-left:auto; border:none; background:linear-gradient(135deg,var(--btn-red1),var(--btn-red2));
+  color:#fff; padding:8px 24px; border-radius:999px; cursor:pointer; font-family:var(--font-title); font-weight:400; font-size:15px; letter-spacing:2px;
+  box-shadow:0 6px 16px rgba(238,21,21,0.3);}
+.pub-btn:hover{filter:brightness(1.05);}
+.post-thumbs{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+.thumb{position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid rgba(150,170,200,0.35);}
+.thumb img{width:100%; height:100%; object-fit:cover;}
+.thumb .x{position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%;
+  background:rgba(40,50,70,.6); color:#fff; font-size:12px; line-height:18px; text-align:center; cursor:pointer;}
+.emoji-panel{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; padding:10px;
+  border-radius:14px; background:rgba(255,255,255,0.7); border:1px dashed rgba(150,170,200,0.45);
+  max-height:170px; overflow:auto;}
+.emoji-panel span{cursor:pointer; font-size:20px; padding:2px 4px; border-radius:8px; line-height:1.2;}
+.emoji-panel span:hover{background:#eef5ff;}
+
+/* 中栏：动态卡片 */
+.moments{display:flex; flex-direction:column; gap:20px;}
+.post-card{background:rgba(255,255,255,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,1); border-radius:24px; padding:18px 20px; position:relative;
+  box-shadow:0 10px 30px rgba(0,0,0,0.05);}
+.pc-head{display:flex; align-items:center; gap:10px;}
+.pc-ava{width:42px; height:42px; border-radius:50%; border:2px solid #fff; object-fit:cover; box-shadow:0 2px 6px rgba(150,180,220,0.3); background:#eef5ff; flex:none;}
+.pc-who{display:flex; flex-direction:column; line-height:1.35;}
+.pc-name{font-size:15px; color:#2c3e50; font-weight:500;}
+.pc-time{font-size:12px; color:#7a8a9a;}
+.pc-text{font-size:15px; color:#2c3e50; margin:10px 0 4px; white-space:pre-wrap; word-break:break-word; line-height:1.8;}
+.pc-grid{display:grid; gap:8px; margin:10px 0 4px;}
+.pc-grid.g1{grid-template-columns:1fr; max-width:340px;}
+.pc-grid.g2{grid-template-columns:1fr 1fr;}
+.pc-grid.g3,.pc-grid.g4,.pc-grid.g5,.pc-grid.g6,.pc-grid.g7,.pc-grid.g8,.pc-grid.g9{grid-template-columns:repeat(3,1fr);}
+.pc-grid img{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.8); background:#fff;}
+.pc-actions{display:flex; gap:10px; margin-top:12px;}
+.act-btn{border:1.5px solid rgba(150,170,200,0.4); background:rgba(255,255,255,0.6); color:#5a6b7a;
+  font-family:var(--font-title); font-size:14px; letter-spacing:1px; padding:6px 16px; border-radius:999px; cursor:pointer;}
+.act-btn:hover{background:#eef5ff;}
+.act-btn.del{color:#c65b5b; border-color:rgba(214,90,90,0.4);}
+.act-btn.del:hover{background:#fdeeee;}
+.cmt-wrap{display:none; margin-top:14px; border-top:1px dashed rgba(150,170,200,0.45); padding-top:14px;}
+.cmt-wrap.open{display:block;}
+.cmt-item{display:flex; gap:8px; margin-top:10px; align-items:flex-start;}
+.cmt-ava{width:32px; height:32px; border-radius:50%; border:2px solid #fff; object-fit:cover; flex:none; background:#eef5ff;}
+.cmt-body{flex:1; min-width:0;}
+.cmeta{font-size:12px; color:#7a8a9a; display:flex; align-items:center; gap:6px;}
+.cmeta b{color:#2c3e50; font-weight:500;}
+.ctext{font-size:14px; color:#2c3e50; white-space:pre-wrap; word-break:break-word; line-height:1.6;}
+.cmt-del{font-size:12px; color:#c65b5b; cursor:pointer; background:none; border:none; margin-left:auto; padding:0; font-family:inherit;}
+.cmt-form{display:flex; gap:8px; margin-top:12px; align-items:center;}
+.cmt-form .cinput{flex:1; min-width:120px; border:1px solid rgba(150,170,200,0.5); border-radius:999px; padding:8px 14px;
+  font-size:14px; background:rgba(255,255,255,0.7); color:#2c3e50; outline:none; font-family:var(--font-body);}
+.cmt-form .cinput:focus{border-color:#bcd4ff; box-shadow:0 0 0 3px rgba(188,212,255,0.3);}
+.cmt-form .cbtn{border:none; background:linear-gradient(135deg,var(--btn-red1),var(--btn-red2)); color:#fff; padding:8px 18px;
+  border-radius:999px; cursor:pointer; font-size:14px; font-family:var(--font-title); font-weight:400; letter-spacing:1px;
+  box-shadow:0 4px 10px rgba(238,21,21,0.25);}
+.cmt-form .cbtn:hover{filter:brightness(1.05);}
+.empty-tip{text-align:center; color:#7a8a9a; font-size:15px; padding:24px;}
+
+/* 右栏：每日心情日历 */
+.cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.cal-nav{width:30px; height:30px; border-radius:50%; border:1.5px solid rgba(150,170,200,0.4);
+  background:rgba(255,255,255,0.7); color:#5a6b7a; font-size:18px; cursor:pointer; line-height:1;
+  display:flex; align-items:center; justify-content:center;}
+.cal-nav:hover{background:#eef5ff;}
+.cal-title{font-family:var(--font-title); font-size:16px; color:#2c3e50; letter-spacing:1px;}
+.cal-week{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px;}
+.cal-week span{text-align:center; font-size:12px; color:#9aa7b8; padding:2px 0;}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+.cal-cell{aspect-ratio:1/1; border-radius:10px; border:1px solid rgba(200,215,235,0.6); background:rgba(255,255,255,0.5);
+  display:flex; align-items:center; justify-content:center; position:relative; cursor:default;
+  font-size:13px; color:#5a6b7a; padding:0; font-family:inherit;}
+.cal-cell.empty{background:transparent; border:none; cursor:default;}
+.cal-cell.day{cursor:pointer;}
+.cal-cell.day:hover{background:rgba(188,212,255,0.4);}
+.cal-cell.has-mood{background:rgba(255,247,224,0.75); border-color:rgba(255,217,61,0.5);}
+.cal-num{position:absolute; top:4px; left:6px; font-size:12px; color:#5a6b7a;}
+.cal-mood{font-size:18px; line-height:1;}
+
+/* ===== 「今天」：高亮小圆底 ===== */
+.cal-cell.today .cal-num{
+  width:18px; height:18px;
+  display:flex; align-items:center; justify-content:center;
+  top:2px; left:3px;                       /* 圆底略微上移，视觉更居中 */
+  border-radius:50%;                        /* 小圆底 */
+  background:linear-gradient(135deg,#ff9a9e,#fecfef);   /* 宝可梦红/樱花粉渐变 */
+  color:#d84a6e;                            /* 深粉文字 */
+  font-weight:600;                          /* 略微加粗（<700，符合全站规范） */
+  box-shadow:0 0 12px rgba(255,154,158,.8); /* 柔光 */
+  animation:todayBreathe 3.2s ease-in-out infinite;
+}
+@keyframes todayBreathe{
+  0%,100%{ transform:scale(1); }
+  50%    { transform:scale(1.05); }
+}
+/* 右上角极小的白色爱心：两个圆角条各自旋转 45° 拼成（纯 CSS，无 emoji） */
+.cal-cell.today .cal-num::before,
+.cal-cell.today .cal-num::after{
+  content:'';
+  position:absolute;
+  top:-2px;
+  width:4px; height:6px;
+  background:#fff;
+  border-radius:4px 4px 0 0;
+}
+.cal-cell.today .cal-num::before{ right:1px; transform:rotate(-45deg); transform-origin:0 100%; }
+.cal-cell.today .cal-num::after { right:5px; transform:rotate( 45deg); transform-origin:100% 100%; }
+/* 点击选中的「其他日期」：淡淡灰色高亮（今天保持粉色圆底） */
+.cal-cell.selected:not(.today){
+  background:rgba(198,208,222,0.5);
+  border-color:rgba(160,175,195,0.55);
+}
+.mood-picker{position:fixed; z-index:60; display:none; flex-wrap:wrap; gap:4px; padding:10px; width:220px;
+  background:rgba(255,255,255,0.95); border:1px solid rgba(255,255,255,1); border-radius:16px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.12); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);}
+.mood-picker span{cursor:pointer; font-size:20px; padding:2px 4px; border-radius:8px; line-height:1.2;}
+.mood-picker span:hover{background:#eef5ff;}
+.mood-picker .mood-clear{width:100%; text-align:center; font-size:12px; color:#c65b5b; font-family:var(--font-title); letter-spacing:1px;}
+
+/* =========================================================
+   碎碎念：五角星悬浮按钮 + Y2K 粉色小窗口
+   ========================================================= */
+.whisper-fab{position:fixed; right:40px; bottom:40px; width:min(100px,22vw); height:min(100px,22vw); border:none; background:none; cursor:pointer; z-index:80; padding:0;
+  animation:fabFloat 3.2s ease-in-out infinite;}
+@keyframes fabFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.fab-star{display:block; width:100%; height:100%; position:relative;
+  background:linear-gradient(135deg,#ff9a9e,#fecfef);
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  filter:drop-shadow(0 0 20px rgba(255,154,158,0.9));
+  transition:transform .18s ease; transform:scale(1);}
+.fab-star::before{content:""; position:absolute; left:26%; top:34%; width:42%; height:26%; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.6), rgba(255,255,255,0) 70%); pointer-events:none;}
+.fab-star::after{content:""; position:absolute; top:12%; right:22%; width:13px; height:13px;
+  background:radial-gradient(circle,#fff 0 30%,rgba(255,255,255,0) 70%);
+  animation:fabTwinkle 2.1s ease-in-out infinite;}
+@keyframes fabTwinkle{0%,100%{opacity:.15; transform:scale(.6);}50%{opacity:1; transform:scale(1.15);}}
+.whisper-fab:hover .fab-star{transform:scale(1.1);}
+.whisper-fab:active .fab-star{transform:scale(.92); transition:transform .08s ease;}
+.fab-text{position:absolute; left:50%; top:55%; transform:translate(-50%,-50%);
+  font-family:var(--font-title); font-size:13px; line-height:1.1; color:#fff; letter-spacing:1px; text-align:center;
+  text-shadow:0 0 2px #fff, 0 0 4px #fff, 0 1px 0 #fff, 0 0 6px rgba(255,255,255,.6);
+  white-space:nowrap; width:auto; pointer-events:none;}
+
+.whisper-overlay{position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,192,203,0.3); padding:20px;
+  opacity:0; visibility:hidden; transition:opacity .35s ease, visibility .35s;}
+.whisper-overlay.show{opacity:1; visibility:visible;}
+.y2k-win{width:min(90vw,480px); background:#ffeef5; padding:4px;
+  border:2px solid; border-color:#ffdfd3 #d88a9a #d88a9a #ffdfd3;
+  outline:2px solid #ff8fb8; outline-offset:0;
+  box-shadow:0 16px 48px rgba(216,138,154,0.45);
+  max-height:86vh; display:flex; flex-direction:column;
+  transform:translateY(14px) scale(.97); transition:transform .35s ease;}
+.whisper-overlay.show .y2k-win{transform:translateY(0) scale(1);}
+.y2k-title{display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(90deg,#ff69b4,#ff8fc0); padding:6px 8px;
+  border:2px solid; border-color:#ffb3d4 #d86a9d #d86a9d #ffb3d4; margin-bottom:4px;}
+.y2k-title .t{font-family:var(--font-title); font-size:14px; color:#fff; letter-spacing:2px;}
+.y2k-close{width:24px; height:22px; cursor:pointer; font-family:var(--font-num); font-size:13px; color:#5c2438;
+  background:linear-gradient(135deg,#ffe6f0,#ffc2da);
+  border:2px solid; border-color:#ffdfd3 #d88a9a #d88a9a #ffdfd3; line-height:1;}
+.y2k-close:active{border-color:#d88a9a #ffdfd3 #ffdfd3 #d88a9a;}
+.y2k-body{background:#fffdf8; padding:18px 16px; margin:0 2px 4px;
+  box-shadow:inset 2px 2px 6px rgba(216,138,154,0.28), inset -1px -1px 4px rgba(216,138,154,0.15);
+  border:1px solid #f3c6d8;
+  overflow-y:auto; min-height:0;          /* 文字变长时窗口内滚动，不会顶出屏幕 */
+  scrollbar-width:thin; scrollbar-color:#ffb3d4 #fff6fa;}
+.y2k-body::-webkit-scrollbar{width:8px;}
+.y2k-body::-webkit-scrollbar-track{background:#fff6fa;}
+.y2k-body::-webkit-scrollbar-thumb{background:#ffb3d4; border-radius:4px;}
+.y2k-text{font-size:15px; line-height:1.8; color:#4a3b5c; font-family:var(--font-body); word-break:break-word;}
+
+@media (max-width:980px){
+  .whisper-fab{right:18px; bottom:18px;}
+  .fab-text{font-size:12px; letter-spacing:0;}
+}
+
+@media (max-width:980px){
+  .blog-shell{grid-template-columns:1fr; gap:20px;}
+  .blog-side{flex-direction:row; flex-wrap:wrap;}
+  .blog-side .blog-card{flex:1 1 260px;}
+}
+
+/* =========================================================
+   灯箱 / 弹窗 / toast
+   ========================================================= */
+#lightbox,#modal{position:fixed; inset:0; z-index:50; display:none;
+  align-items:center; justify-content:center; background:rgba(60,40,90,0.45);
+  backdrop-filter:blur(4px); padding:20px;}
+#lightbox.show,#modal.show{display:flex;}
+#lightbox img{max-width:90vw; max-height:80vh; border-radius:16px; box-shadow:var(--shadow);}
+#modal .card{width:min(420px,92vw); max-height:80vh; overflow:auto;}
+.modal-title{font-family:var(--font-title); font-weight:400; color:#7b5cff; margin-bottom:12px; font-size:18px; letter-spacing:2px;}
+.hist-item{font-size:13px; border-bottom:1px dashed rgba(150,130,200,.3); padding:8px 0; line-height:1.6;}
+.hist-item b{color:var(--accent2);}
+#toast{position:fixed; left:50%; bottom:40px; transform:translateX(-50%) translateY(20px);
+  background:rgba(74,59,92,0.92); color:#fff; padding:12px 22px; border-radius:999px;
+  font-size:14px; z-index:99; opacity:0; transition:opacity .3s, transform .3s; pointer-events:none;
+  max-width:90vw; text-align:center;}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* =========================================================
+   移动端适配：关闭 backdrop-filter 与 3D 倾斜
+   ========================================================= */
+@media (max-width:768px){
+  .card,.menu-btn,.page,.profile-card,.diary-box,.post-card,.back,.bgm-toggle,.btn,
+  .profile-extra,.emoji-panel{backdrop-filter:none; -webkit-backdrop-filter:none;}
+  .album{perspective:none;}
+  .page.flip{transform:none; opacity:.5;}
+  .menu-grid{grid-template-columns:1fr 1fr;}
+  .title{font-size:24px;}
+  .branch{font-size:22px;}
+  .album{flex-direction:column; align-items:center;}
+  .page{max-width:90vw; width:90vw;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 全局背景：用户提供的图片（烟花页除外） ============ -->
+<div id="bg"></div>
+<div id="bgStars">
+  <div id="sparkles"></div>
+  <div id="petalsGlobal"></div>
+</div>
+
+<!-- 通用：BGM 音频（各页面音乐在脚本顶部 BGM_FILES 配置） -->
+<audio id="bgm" loop preload="auto"></audio>
+
+<!-- ============ 第一页：密码 ============ -->
+<section class="screen active" id="screen-password">
+  <div class="pw-deco" aria-hidden="true">
+    <!-- 宝可梦剪影水印 -->
+    <div class="wm-ball" style="left:5%; bottom:9%;"></div>
+    <div class="wm-pika" style="right:6%; top:11%;"><span class="ear l"></span><span class="ear r"></span></div>
+    <!-- 星光 -->
+    <span class="pw-star" style="left:6%;top:18%;--c:#fff3c4;--sz:4px;--d:0s"></span>
+    <span class="pw-star" style="left:12%;top:70%;--c:#ffffff;--sz:3px;--d:1.2s"></span>
+    <span class="pw-star" style="left:20%;top:40%;--c:#fff3c4;--sz:5px;--d:2s"></span>
+    <span class="pw-star" style="left:30%;top:12%;--c:#ffffff;--sz:3px;--d:0.6s"></span>
+    <span class="pw-star" style="left:38%;top:82%;--c:#fff3c4;--sz:4px;--d:1.8s"></span>
+    <span class="pw-star" style="left:46%;top:30%;--c:#ffd6e8;--sz:3px;--d:2.4s"></span>
+    <span class="pw-star" style="left:54%;top:60%;--c:#ffffff;--sz:5px;--d:0.9s"></span>
+    <span class="pw-star" style="left:60%;top:16%;--c:#fff3c4;--sz:3px;--d:1.5s"></span>
+    <span class="pw-star" style="left:68%;top:74%;--c:#ffffff;--sz:4px;--d:2.1s"></span>
+    <span class="pw-star" style="left:74%;top:38%;--c:#fff3c4;--sz:4px;--d:0.3s"></span>
+    <span class="pw-star" style="left:80%;top:20%;--c:#ffd6e8;--sz:3px;--d:1.1s"></span>
+    <span class="pw-star" style="left:86%;top:64%;--c:#ffffff;--sz:5px;--d:2.6s"></span>
+    <span class="pw-star" style="left:92%;top:44%;--c:#fff3c4;--sz:3px;--d:0.7s"></span>
+    <span class="pw-star" style="left:4%;top:50%;--c:#ffffff;--sz:3px;--d:1.9s"></span>
+    <span class="pw-star" style="left:16%;top:88%;--c:#fff3c4;--sz:4px;--d:1.3s"></span>
+    <span class="pw-star" style="left:88%;top:86%;--c:#fff3c4;--sz:3px;--d:2.3s"></span>
+    <span class="pw-star" style="left:50%;top:8%;--c:#ffffff;--sz:4px;--d:0.4s"></span>
+    <span class="pw-star" style="left:64%;top:50%;--c:#ffd6e8;--sz:3px;--d:1.7s"></span>
+    <!-- 雪花 -->
+    <div class="snowflake" style="--s:42px;left:10%;top:26%;--d:0s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+    <div class="snowflake" style="--s:28px;left:78%;top:22%;--d:1.5s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+    <div class="snowflake" style="--s:50px;left:18%;top:70%;--d:0.8s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+    <div class="snowflake" style="--s:34px;left:84%;top:66%;--d:2.2s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+    <div class="snowflake" style="--s:24px;left:46%;top:14%;--d:1.1s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+    <div class="snowflake" style="--s:38px;left:70%;top:84%;--d:3s"><div class="sf-inner"><i></i><i></i><i></i></div></div>
+  </div>
+  <div class="card pw-card">
+    <div class="crown" aria-hidden="true">
+      <div class="crown-inner">
+        <div class="crown-shape"></div>
+        <div class="crown-base"></div>
+        <div class="crown-gem"></div>
+        <span class="crown-sparkle"></span>
+      </div>
+    </div>
+    <h1>小陈的秘密基地</h1>
+    <input id="pwInput" type="password" inputmode="text" autocomplete="off">
+    <div class="pwHint">密码长度为11位</div>
+    <button class="btn" onclick="checkPw()">确认进入</button>
+    <div class="pwErr" id="pwErr"></div>
+  </div>
+</section>
+
+<!-- ============ 第二页：生日蛋糕 ============ -->
+<section class="screen" id="screen-cake">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div id="confetti"></div>
+  <div class="cake-card">
+    <div class="title">祝哈基陈生日快乐！</div>
+    <div class="cake-wrap">
+      <div id="candles"></div>
+      <div class="tier top">
+        <div class="cream-wave"><div></div><div></div><div></div><div></div><div></div></div>
+        <div class="deco" style="left:10px; top:16px;"><svg viewBox="0 0 40 40"><g fill="#8fd9a8" stroke="#5fbf6a" stroke-width="0.6"><ellipse cx="20" cy="11" rx="6" ry="8"/><ellipse cx="29" cy="20" rx="8" ry="6"/><ellipse cx="20" cy="29" rx="6" ry="8"/><ellipse cx="11" cy="20" rx="8" ry="6"/></g><circle cx="20" cy="20" r="2" fill="#5fbf6a"/><path d="M20 29 Q19 36 22 39" stroke="#5fbf6a" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="deco" style="right:10px; top:16px;"><svg viewBox="0 0 40 40" stroke="#9ec9ff" stroke-width="2" stroke-linecap="round"><g fill="none"><line x1="20" y1="4" x2="20" y2="36"/><line x1="5" y1="12" x2="35" y2="28"/><line x1="35" y1="12" x2="5" y2="28"/></g><g stroke="#cfe6ff" stroke-width="1.5" fill="none"><path d="M20 10 l-3 -3 M20 10 l3 -3 M20 30 l-3 3 M20 30 l3 3"/><path d="M9 15 l-4 1 M9 15 l-1 -4 M31 25 l4 -1 M31 25 l1 4"/><path d="M31 15 l4 1 M31 15 l1 -4 M9 25 l-4 -1 M9 25 l-1 4"/></g><circle cx="20" cy="20" r="2" fill="#fff" stroke="none"/></svg></div>
+      </div>
+      <div class="tier bottom">
+        <div class="cream-wave alt"><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        <div class="deco" style="left:16px; top:22px;"><svg viewBox="0 0 40 40"><path d="M14 12 Q20 5 26 12" fill="none" stroke="#7fb8e8" stroke-width="2"/><path d="M14 12 Q12 22 16 30" fill="none" stroke="#7fb8e8" stroke-width="2"/><path d="M26 12 Q28 22 24 30" fill="none" stroke="#7fb8e8" stroke-width="2"/><circle cx="16" cy="31" r="6" fill="#9ec9ff"/><circle cx="24" cy="31" r="6" fill="#9ec9ff"/><circle cx="14" cy="29" r="1.6" fill="#fff" opacity=".7"/><circle cx="22" cy="29" r="1.6" fill="#fff" opacity=".7"/><path d="M14 12 l4 -3 l1 2 z" fill="#8fd9a8"/></svg></div>
+        <div class="deco" style="right:18px; top:20px;"><svg viewBox="0 0 40 40"><path d="M12 14 L14 5 L20 12 Z" fill="#f3e9d8" stroke="#d8c4a8" stroke-width="1"/><path d="M28 14 L26 5 L20 12 Z" fill="#f3e9d8" stroke="#d8c4a8" stroke-width="1"/><circle cx="20" cy="22" r="13" fill="#f3e9d8" stroke="#d8c4a8" stroke-width="1.5"/><circle cx="15" cy="21" r="2" fill="#5a6b8a"/><circle cx="25" cy="21" r="2" fill="#5a6b8a"/><path d="M20 24 l-2 1.5 h4 z" fill="#9fb6d0"/><path d="M20 25.5 v2.5" stroke="#5a6b8a" stroke-width="1.2" fill="none"/><path d="M11 23 h6 M11 26 h6 M29 23 h-6 M29 26 h-6" stroke="#5a6b8a" stroke-width="0.8"/><path d="M14 8 q6 -3 12 0 q-6 3 -12 0 z" fill="#9ec9ff"/></svg></div>
+        <div class="deco" style="left:50%; top:26px; transform:translateX(-50%);"><svg viewBox="0 0 40 40"><path d="M10 18 L30 18 L27 34 Q20 38 13 34 Z" fill="#cfe6ff" stroke="#9ec9ff" stroke-width="1"/><path d="M10 18 L30 18 L29 23 L11 23 Z" fill="#a9d4ff"/><ellipse cx="20" cy="18" rx="10" ry="3.2" fill="#fff"/><path d="M16 14 q4 -6 8 0 q-4 4 -8 0 z" fill="#fff"/><circle cx="20" cy="9" r="2.5" fill="#7fb8e8"/></svg></div>
+      </div>
+      <div class="plate"></div>
+    </div>
+    <div class="sub">请寿星许个愿望吹灭蜡烛吧！（蜡烛点击熄灭）</div>
+  </div>
+</section>
+
+<!-- ============ 过渡界面：四大模块 ============ -->
+<section class="screen" id="screen-menu">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div class="title">小陈的专属栖息地</div>
+  <div class="menu-grid">
+    <div class="menu-btn" onclick="showScreen('fireworks')"><span class="ico">🎆</span>观赏烟花</div>
+    <div class="menu-btn" onclick="showScreen('fortune')"><span class="ico">🔮</span>今日运势</div>
+    <div class="menu-btn" onclick="showScreen('album')"><span class="ico">📖</span>小小相册</div>
+    <div class="menu-btn" onclick="showScreen('record')"><span class="ico">📝</span>记录本</div>
+  </div>
+</section>
+
+<!-- ============ 模块一：观赏烟花 ============ -->
+<section class="screen" id="screen-fireworks">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div id="fwSky"></div>
+  <canvas id="fwCanvas"></canvas>
+  <div class="content">
+    <div class="fw-tip">✨ 看，天空为你绽放 ✨</div>
+  </div>
+</section>
+
+<!-- ============ 模块二：今日运势 ============ -->
+<section class="screen" id="screen-fortune">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div class="fortune-card">
+    <div class="title">今日运势</div>
+    <p class="fortune-sub">摇一摇精灵球，看看今天的小幸运～</p>
+    <div id="tube"></div>
+    <div id="fortuneMsg" class="fortune-msg"></div>
+    <button class="fdraw-btn" id="drawBtn" onclick="drawFortune()">抽 签</button>
+    <div class="fcard" id="fcard"></div>
+  </div>
+</section>
+
+<!-- ============ 模块三：小小相册 ============ -->
+<section class="screen" id="screen-album">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div class="title">小小相册</div>
+  <div class="album-stage">
+    <div id="petals"></div>
+    <span class="branch" style="left:-22px; top:-22px;"><span class="bw"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <span class="branch" style="right:-22px; top:-22px;"><span class="bw" style="transform:rotate(90deg)"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <span class="branch" style="right:-22px; bottom:-22px;"><span class="bw" style="transform:rotate(180deg)"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <span class="branch" style="left:-22px; bottom:-22px;"><span class="bw" style="transform:rotate(270deg)"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <span class="branch" style="left:calc(50% - 33px); top:-30px;"><span class="bw"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <span class="branch" style="left:calc(50% - 33px); bottom:-30px;"><span class="bw" style="transform:rotate(180deg)"><svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"><path d="M16 128 C 42 110 36 72 74 56 S 116 40 128 12" fill="none" stroke="#b7a98c" stroke-width="4.5" stroke-linecap="round"/><path d="M44 92 q -20 -4 -27 -22 q 21 0 27 22 z" fill="#9ec7a3"/><path d="M62 70 q 18 -12 34 -9 q -12 18 -34 9 z" fill="#aeddb2"/><path d="M88 44 q 16 -6 22 -22 q -18 2 -22 22 z" fill="#9ec7a3"/><g transform="translate(128 12)"><circle r="6.5" cx="0" cy="-8" fill="#ffc2d6"/><circle r="6.5" cx="7.7" cy="-2.5" fill="#ffc2d6"/><circle r="6.5" cx="4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-4.8" cy="6.5" fill="#ffc2d6"/><circle r="6.5" cx="-7.7" cy="-2.5" fill="#ffc2d6"/><circle r="4.4" fill="#ffd96b"/></g><g transform="translate(74 56)"><circle r="5.5" cx="0" cy="-7" fill="#ffd0e0"/><circle r="5.5" cx="6.6" cy="-2" fill="#ffd0e0"/><circle r="5.5" cx="4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-4" cy="5.6" fill="#ffd0e0"/><circle r="5.5" cx="-6.6" cy="-2" fill="#ffd0e0"/><circle r="3.6" fill="#ffd96b"/></g><g transform="translate(40 104)"><circle r="4.5" cx="0" cy="-5.5" fill="#ffe0ec"/><circle r="4.5" cx="5.2" cy="-1.7" fill="#ffe0ec"/><circle r="4.5" cx="3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-3.2" cy="4.4" fill="#ffe0ec"/><circle r="4.5" cx="-5.2" cy="-1.7" fill="#ffe0ec"/><circle r="3" fill="#ffd96b"/></g></svg></span></span>
+    <div class="album">
+      <div class="page" id="pageL"></div>
+      <div class="page" id="pageR"></div>
+    </div>
+  </div>
+  <div class="page-ind" id="pageInd"></div>
+  <div class="album-bar">
+    <button class="btn ghost" onclick="prevPage()">← 上一页</button>
+    <button class="btn ghost" onclick="nextPage()">下一页 →</button>
+    <button class="btn" onclick="document.getElementById('fileInput').click()">上传照片</button>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onUpload(event)">
+</section>
+
+<!-- ============ 模块四：记录本（私人朋友圈） ============ -->
+<section class="screen" id="screen-record">
+  <div class="topbar">
+    <button class="back" onclick="goBack()">← 返回</button>
+    <button class="bgm-toggle" onclick="toggleBgm()">🎵 BGM</button>
+  </div>
+  <div class="blog-shell">
+    <div id="bookStars"></div>
+
+    <!-- 左侧栏：博主档案 + 时光轴 -->
+    <aside class="blog-side">
+      <div class="blog-card author-card">
+        <img class="author-avatar" id="pfAvatar" src="" alt="头像" onclick="document.getElementById('avatarInput').click()">
+        <div class="author-name" id="pfName" onclick="editNickname()">哈基陈</div>
+        <div class="author-sig" id="pfSig" onclick="editSignature()" title="点击修改签名">今天也要元气满满！</div>
+        <button class="mini-btn" onclick="document.getElementById('avatarInput').click()">更换头像</button>
+        <input type="file" id="avatarInput" accept="image/*" hidden onchange="changeAvatar(this)">
+        <span id="pfSig2" style="display:none;"></span>
+        <img id="postAvatar" src="" alt="" style="display:none;">
+        <input type="hidden" id="postNick">
+      </div>
+
+      <div class="blog-card timeline-card">
+        <div class="side-title">🕰️ 时光轴</div>
+        <ul class="timeline">
+          <li>
+            <span class="dot"></span>
+            <div class="tl-date">2006年6月14日</div>
+            <div class="tl-badge">至今已经 <b id="daysCount2">—</b> 天</div>
+            <div class="tl-note">你出生的那一天是上帝认为世界不能再没有你的那一天</div>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <div class="tl-note">这期间你像树一样坚毅又盎然地生长着</div>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <div class="tl-date">2021年9月</div>
+            <div class="tl-note">我记得这个时候你结识了一个神对吧？答案肯定是对！
+              <span class="tl-right">神会一直让好运眷顾你的</span>
+            </div>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <div class="tl-date">2024年6月7日</div>
+            <div class="tl-note">高考加油呀哈基陈！</div>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <div class="tl-date" id="tlNow">现如今</div>
+            <div class="tl-note">现如今，你已经很棒啦！</div>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 中栏：发表区 + 动态列表 -->
+    <main class="blog-main">
+      <div class="blog-card post-box">
+        <div class="post-title">📝 发表新动态</div>
+        <textarea id="postText" maxlength="614" placeholder="分享今天的心情吧…"></textarea>
+        <div class="post-actions">
+          <button class="pick-btn" onclick="document.getElementById('imgInput').click()">📷 添加图片</button>
+          <span class="max-hint">最多 9 张</span>
+          <button class="tool-btn" onclick="toggleEmoji()">😊 表情</button>
+          <span class="post-count"><span id="postCount">0</span>/614</span>
+          <button class="pub-btn" onclick="publishMoment()">发表</button>
+        </div>
+        <div class="post-thumbs" id="postThumbs"></div>
+        <input type="file" id="imgInput" accept="image/*" multiple hidden onchange="addImages(this)">
+        <div class="emoji-panel" id="emojiPanel" style="display:none;"></div>
+      </div>
+
+      <div class="moments" id="momentsList"></div>
+    </main>
+
+    <!-- 右侧栏：每日心情 -->
+    <aside class="blog-side">
+      <div class="blog-card mood-card">
+        <div class="side-title">📅 每日心情</div>
+        <div class="cal-head">
+          <button class="cal-nav" onclick="prevMonth()">‹</button>
+          <div class="cal-title" id="calTitle">2026年 10月</div>
+          <button class="cal-nav" onclick="nextMonth()">›</button>
+        </div>
+        <div class="cal-week">
+          <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 每日心情 emoji 选择面板 -->
+  <div id="moodPicker" class="mood-picker"></div>
+
+  <!-- 碎碎念：五角星悬浮按钮 + Y2K 小窗口 -->
+  <button class="whisper-fab" onclick="openWhisper()" aria-label="碎碎念">
+    <span class="fab-star"><span class="fab-text">碎碎念</span></span>
+  </button>
+  <div class="whisper-overlay" id="whisperOverlay" onclick="if(event.target===this)closeWhisper()">
+    <div class="y2k-win" role="dialog" aria-label="碎碎念">
+      <div class="y2k-title">
+        <span class="t">碎碎念.txt</span>
+        <button class="y2k-close" onclick="closeWhisper()" aria-label="关闭">×</button>
+      </div>
+      <div class="y2k-body">
+        <div class="y2k-text">铛铛铛！这是专属于你的小空间！咳咳，虽然看起来没什么卵用，不如发朋友圈，但是呢。。。我编不出来了嘻嘻（因为以我的水平做出来的这个我真的觉得没什么用！没法昧着良心扯出来优点）。总之你可以在这里记录一下自己的每日心情写点杂七杂八的什么都可以，只有你自己可以看到！放心吧！神也是看不到的！<br><br>（我知道每次进入页面都要输密码然后点前面一堆东西很麻烦啦！但是密码是不得不设置的！万一网址不小心别人看到了呢，虽然说这些记录只保存在自己的本机设备只有自己能看到吧。。。但是还是不想放不属于这个网页的人进来！）<br><br>头像昵称个签什么的都是可以点击一下换的哦。那个默认的头像可不是我设置的，系统随机给的！无任何含义！<br><br>手机端看这个界面或许有点奇怪，不过在电脑端看是排布好的界面。我实在想不到如何让它适配手机端的同时也显示博客页面排版！哦哈哈哈！</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 灯箱 / 弹窗 / toast -->
+<div id="lightbox" onclick="closeLightbox()"><img id="lightboxImg" src="" alt=""></div>
+<div id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="card">
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalBody"></div>
+    <div style="text-align:right; margin-top:12px;"><button class="btn ghost" onclick="closeModal()">关闭</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   配置区（你只需要改这里）
+   ========================================================= */
+// ===== 背景音乐：每个页面一首 =====
+// 把 4 个 mp3 拖进项目里的 bgm/ 文件夹（与 index.html 同级的 bgm 目录）即可自动生效，不用改代码。
+// 想换歌/换文件名，改下面的字符串就行（例如 'bgm/我的歌.mp3'）。
+const BGM_FILES = {
+  password:  'bgm/birthday.mp3', // 密码页
+  cake:      'bgm/birthday.mp3', // 蛋糕页（与密码页共用）
+  menu:      'bgm/n.mp3',        // 小陈的专属栖息地（单独一首）
+  fireworks: 'bgm/bird.mp3',     // 观赏烟花（共用 bird.mp3）
+  record:    'bgm/bird.mp3',     // 记录本（共用 bird.mp3）
+  fortune:   'bgm/jia.mp3',      // 今日运势
+  album:     'bgm/yu.mp3'        // 小小相册
+};
+
+// ===== BGM 加速（可选，解决 GitHub Pages 打开慢、音乐半天加载不出来）=====
+// GitHub Pages（github.io）在国内速度不稳定，实测有时只有 40~60 KB/s，几 MB 的音乐会等很久。
+// 如果你有更快的地址（对象存储/CDN/另一个托管平台），把它填在下面，音乐就会优先从那里加载：
+//   例：const BGM_CDN = 'https://你的域名.com/bgm';
+//   例：const BGM_CDN = 'https://cdn.jsdelivr.net/gh/用户名/仓库名@main';
+// 留空（''）则只从本仓库的 bgm/ 目录加载。
+// 代码带自动回退：加速地址若加载失败或 5 秒没缓冲出来，会自动换回同目录的 bgm/xxx.mp3，不会没声音。
+const BGM_CDN = '';
+
+// 相册初始 6 张照片：把图片命名为 album1.jpg ~ album6.jpg 放到同目录即可自动显示
+const ALBUM_FILES = ['album1.jpg','album2.jpg','album3.jpg','album4.jpg','album5.jpg','album6.jpg'];
+
+// 相册初始 6 张占位图（文件缺失时回退显示，避免出现碎图）
+function placeholder(label, c1, c2){
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'>"
+    + "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>"
+    + "<stop offset='0' stop-color='"+c1+"'/><stop offset='1' stop-color='"+c2+"'/></linearGradient></defs>"
+    + "<rect width='400' height='400' fill='url(#g)'/>"
+    + "<text x='200' y='212' font-size='32' fill='rgba(255,255,255,0.95)' text-anchor='middle' font-family='sans-serif'>"+label+"</text></svg>";
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+// 相册 6 张初始照片：直接读取同目录的 album1.jpg ~ album6.jpg
+// 换图只要替换这 6 个文件；文件不存在时会回退到占位图（不会显示碎图）
+function resolvedInitialPhotos(){
+  return ALBUM_FILES.slice();
+}
+
+// 宝可梦 → Emoji 映射（不使用任何外部图片，纯 Emoji + CSS 绘制）
+const POKE_EMOJI = {
+  '皮卡丘':'🐭', '伊布':'🦊', '胖丁':'🎈', '波克比':'🥚', '梦幻':'🌸', '基拉祈':'⭐',
+  '谢米':'🌼', '玛夏多':'👻', '时拉比':'🍃', '七夕青鸟':'🕊️', '皮丘':'⚡', '菊草叶':'🌿',
+  'pokeball':'🔴'
+};
+// 默认头像：把 Emoji 画进 SVG（data URI，完全离线、可直接作为 <img src>）
+function emojiAvatar(e){
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>"
+    + "<defs><radialGradient id='g' cx='50%' cy='42%'><stop offset='0' stop-color='#fff7da'/><stop offset='1' stop-color='#ffe1ef'/></radialGradient></defs>"
+    + "<circle cx='60' cy='60' r='60' fill='url(#g)'/>"
+    + "<text x='60' y='62' font-size='66' text-anchor='middle' dominant-baseline='central'>"+e+"</text></svg>";
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+// 烟花中偶尔炸出的宝可梦剪影（用 emoji 在 canvas 绘制，无需外链）
+/* 烟花不再使用 emoji 剪影，只保留粒子与文字烟火 */
+
+/* =========================================================
+   工具函数
+   ========================================================= */
+const isMobile = () => window.innerWidth < 768;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+/* =========================================================
+   背景：水彩风景 + 细闪 + 宝可梦（纯 CSS / SVG / Emoji）
+   ========================================================= */
+function buildBackground(){
+  // 闪烁星星（金色 / 白色）
+  const sp = document.getElementById('sparkles');
+  const sn = isMobile() ? 12 : 18;
+  for(let i=0;i<sn;i++){
+    const d = document.createElement('div'); d.className='star' + (Math.random()<0.4?' w':'');
+    d.textContent = Math.random()<0.5 ? '✦' : '✧';
+    d.style.left = Math.random()*100+'%';
+    d.style.top = Math.random()*78+'%';
+    d.style.fontSize = (10 + Math.random()*10)+'px';
+    d.style.animationDelay = (Math.random()*3)+'s';
+    d.style.animationDuration = (2.4+Math.random()*2.6)+'s';
+    sp.appendChild(d);
+  }
+  // 飘落花瓣
+  const pg = document.getElementById('petalsGlobal');
+  const pitems = ['🌸','🌼','🍃','🌺','💮'];
+  const pn = isMobile() ? 8 : 13;
+  for(let i=0;i<pn;i++){
+    const p = document.createElement('div'); p.className='petal-g';
+    p.textContent = pitems[Math.floor(Math.random()*pitems.length)];
+    p.style.left = Math.random()*100+'%';
+    p.style.animationDuration = (9 + Math.random()*8)+'s';
+    p.style.animationDelay = (-Math.random()*12)+'s';
+    p.style.fontSize = (12 + Math.random()*10)+'px';
+    pg.appendChild(p);
+  }
+}
+
+/* =========================================================
+   屏幕切换
+   ========================================================= */
+let current = 'password';
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.toggle('active', s.id === 'screen-'+id);
+  });
+  if(id === 'cake') buildCandles();
+  if(id !== 'fireworks') stopFireworks(); else startFireworks();
+  if(id === 'cake') cakeConfetti();
+  if(id === 'record') startRecord(); else stopRecord();
+  if(id === 'fortune') startFortune();
+  playBgmFor(id);
+  current = id;
+}
+function goBack(){
+  if(current === 'menu') showScreen('cake');
+  else if(current === 'cake') showScreen('password');
+  else showScreen('menu');
+}
+
+/* =========================================================
+   BGM（每个页面一首，文件见顶部 BGM_FILES）
+   ========================================================= */
+const bgm = document.getElementById('bgm');
+const BGM_VOLUME = 0.5;         // 正常音量
+const FADE_MS = 1800;           // 淡入时长（毫秒），缓缓升起不吓人
+const LOAD_TIMEOUT = 5000;      // 5 秒还没缓冲出来就换下一个源（CDN 卡住时自动回退到同目录）
+let bgmOn = true;
+let currentBgmFile = '';        // 当前已加载的音乐文件
+let fadeTimer = null;
+let loadTimer = null;
+bgm.volume = 0;
+
+/* 生成候选地址：优先 CDN，失败再用同目录相对路径（保证一定有声） */
+function bgmCandidates(file){
+  if(!BGM_CDN) return [file];
+  const cdn = BGM_CDN.replace(/\/+$/,'') + '/' + String(file).replace(/^\/+/,'');
+  return cdn === file ? [file] : [cdn, file];
+}
+/* 依次尝试候选地址；出错或超时就换下一个 */
+function loadBgm(urls, i){
+  if(i >= urls.length) return;
+  clearTimeout(loadTimer);
+  bgm.onerror = ()=>{ if(i + 1 < urls.length) loadBgm(urls, i + 1); };
+  bgm.oncanplay = ()=> clearTimeout(loadTimer);
+  loadTimer = setTimeout(()=>{
+    if(bgm.readyState < 3 && i + 1 < urls.length) loadBgm(urls, i + 1);
+  }, LOAD_TIMEOUT);
+  bgm.src = urls[i];
+  bgm.load();
+  if(bgmOn) startWithFade();
+}
+/* 首屏音乐响起来之后，在后台把其余几首悄悄缓存好，之后切页几乎零等待 */
+const bgmPrefetched = {};
+function prefetchBgm(){
+  // 一首一首串行缓存：同时下载 4 首会互相抢带宽，慢网络下反而更慢
+  const files = [...new Set(Object.values(BGM_FILES))].filter(f=> !bgmPrefetched[f] && f !== currentBgmFile);
+  let i = 0;
+  (function next(){
+    if(i >= files.length) return;
+    const f = files[i++];
+    bgmPrefetched[f] = true;
+    const a = new Audio();
+    a.preload = 'auto';
+    a.volume = 0;
+    let finished = false;
+    const done = ()=>{ if(finished) return; finished = true; next(); };
+    a.oncanplay = done;
+    a.onerror = done;
+    a.src = bgmCandidates(f)[0];
+    a.load();
+    setTimeout(done, 20000);   // 最多等 20 秒就换下一首，避免慢网络下卡死
+  })();
+}
+
+/* 音量从 0 平滑升到 BGM_VOLUME，避免「啪」地一下炸响 */
+function fadeIn(ms){
+  clearInterval(fadeTimer);
+  const total = ms || FADE_MS;
+  const step = 40;
+  const target = BGM_VOLUME;
+  let v = 0;
+  bgm.volume = 0;
+  fadeTimer = setInterval(()=>{
+    v += target * (step / total);
+    if(v >= target){ bgm.volume = target; clearInterval(fadeTimer); fadeTimer = null; }
+    else bgm.volume = v;
+  }, step);
+}
+/* 音量平滑降到 0 后执行回调（用于换歌/关闭） */
+function fadeOut(ms, cb){
+  clearInterval(fadeTimer);
+  const total = ms || 500;
+  const step = 40;
+  let v = bgm.volume;
+  if(v <= 0){ if(cb) cb(); return; }
+  fadeTimer = setInterval(()=>{
+    v -= BGM_VOLUME * (step / total);
+    if(v <= 0){ bgm.volume = 0; clearInterval(fadeTimer); fadeTimer = null; if(cb) cb(); }
+    else bgm.volume = v;
+  }, step);
+}
+/* 开始播放：先起播再从 0 淡入 */
+function startWithFade(){
+  const p = bgm.play();
+  if(p && p.catch) p.catch(()=>{});
+  fadeIn(FADE_MS);
+}
+function playBgmFor(screenId){
+  const file = BGM_FILES[screenId];
+  if(!file) return;
+  const src = file;
+  if(currentBgmFile === src){         // 同一首：不重启，跨页共用时无缝衔接
+    if(bgmOn && bgm.paused) startWithFade();
+    return;
+  }
+  const switching = !bgm.paused;      // 正在播别的歌 → 先淡出再换，避免切歌爆音
+  const doSwitch = ()=>{
+    currentBgmFile = src;
+    loadBgm(bgmCandidates(src), 0);   // 优先 CDN；失败/超时自动回退到同目录文件
+  };
+  if(switching) fadeOut(450, doSwitch); else doSwitch();
+}
+function toggleBgm(){
+  bgmOn = !bgmOn;
+  if(bgmOn){
+    if(currentBgmFile) startWithFade();
+    else toast('把 mp3 拖进 bgm 文件夹就生效啦～');
+  } else {
+    fadeOut(500, ()=> bgm.pause());   // 关闭时也淡出，不硬切
+  }
+  updateBgmButtons();
+}
+/* 浏览器规定：网页不能在用户毫无交互时自动播放声音（防扰民、省流量），Chrome/Edge/Safari 都会拦截。
+   这里的处理让它尽可能自然地响起来：
+   1) 打开页面就先尝试播放（浏览器允许时会自动响起，同样是 1.8 秒淡入，不会吓人）；
+   2) 若被拦截，就在用户第一次点击/按键/触屏时启动；
+   两种情况都是「音量从 0 缓缓升起」，而不是「啪」地一下炸响。 */
+(function armFirstGesture(){
+  let unlocked = false;
+  const evs = ['click','keydown','touchstart','pointerdown'];
+  function unlock(){
+    if(unlocked) return;
+    unlocked = true;
+    evs.forEach(t=>document.removeEventListener(t, unlock));
+    playBgmFor(current);
+  }
+  evs.forEach(t=>document.addEventListener(t, unlock));
+  playBgmFor(current);   // 先试一次；被拦下也无妨，首次交互时会自动补上
+
+  /* 首屏只加载当前这一首，先保证它最快响起来；
+     等 3 秒（或页面资源加载完）再在后台把其余几首缓存好，切页时几乎零等待。
+     注：明显慢的网络（2G/省流量模式）不预取，否则后台下载会抢走本就不够的带宽。 */
+  const netInfo = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+  const slowNet = netInfo && (netInfo.saveData || netInfo.effectiveType === '2g' || netInfo.effectiveType === 'slow-2g');
+  if(!slowNet){
+    setTimeout(prefetchBgm, 3000);
+    if(document.readyState === 'complete') setTimeout(prefetchBgm, 800);
+    else window.addEventListener('load', ()=> setTimeout(prefetchBgm, 800));
+  }
+
+  /* 兜底：任何时候若音乐该响却被浏览器挡住了（例如蛋糕自动跳转菜单的瞬间），
+     下一次交互就会自动接上，不会出现「莫名其妙没声音」。已在播放则不做任何事。 */
+  evs.forEach(t=>document.addEventListener(t, ()=>{
+    if(bgmOn && currentBgmFile && bgm.paused) startWithFade();
+  }));
+})();
+function updateBgmButtons(){
+  document.querySelectorAll('.bgm-toggle').forEach(b=>{
+    b.textContent = bgmOn ? '🎵 BGM' : '🔇 BGM';
+    b.classList.toggle('off', !bgmOn);
+  });
+}
+
+/* =========================================================
+   第一页：密码
+   ========================================================= */
+function checkPw(){
+  const v = document.getElementById('pwInput').value;
+  const err = document.getElementById('pwErr');
+  if(v === 'cjy20060614'){
+    err.textContent = '';
+    showScreen('cake');   // showScreen 内部会按页面播放对应 BGM（密码/蛋糕共用 birthday.mp3）
+  }else{
+    err.textContent = '密码输错啦，请仔细思考一下重试吧！或者可以找一下某位天才问一下密码哦！';
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPw(); });
+
+/* =========================================================
+   第二页：蛋糕 + 蜡烛 + 彩带
+   ========================================================= */
+let candleOut = 0;
+function buildCandles(){
+  const wrap = document.getElementById('candles');
+  wrap.innerHTML = '';
+  candleOut = 0;
+  for(let i=0;i<3;i++){
+    const c = document.createElement('div'); c.className='candle';
+    c.innerHTML = '<div class="flame"></div><div class="stick"></div>';
+    c.onclick = ()=>extinguish(c);
+    wrap.appendChild(c);
+  }
+}
+function extinguish(c){
+  if(c.classList.contains('out')) return;
+  c.classList.add('out');
+  const s = document.createElement('div'); s.className='smoke'; c.appendChild(s);
+  setTimeout(()=>s.remove(), 1200);
+  candleOut++;
+  if(candleOut >= 3){ setTimeout(()=>showScreen('menu'), 1300); }
+}
+function cakeConfetti(){
+  const c = document.getElementById('confetti');
+  c.innerHTML = '';
+  const colors = ['#ffd93d','#ff8fb1','#b388ff','#3b8ef0','#fff3c4','#ff6fae'];
+  const N = 28;
+  for(let i=0;i<N;i++){
+    const d = document.createElement('div'); d.className='ribbon';
+    d.style.background = colors[i % colors.length];
+    const ang = Math.random()*Math.PI*2;
+    const dist = 120 + Math.random()*260;
+    d.style.setProperty('--dx', Math.cos(ang)*dist+'px');
+    d.style.setProperty('--dy', Math.sin(ang)*dist+'px');
+    d.style.setProperty('--rot', (Math.random()*720-360)+'deg');
+    d.style.animationDelay = (Math.random()*0.1)+'s';
+    c.appendChild(d);
+  }
+  setTimeout(()=>{ c.innerHTML=''; }, 2300);
+}
+
+/* =========================================================
+   模块一：烟花（高性能 canvas）
+   ========================================================= */
+const FW_COLORS = ['#ffd93d','#ff8fb1','#b388ff','#3b8ef0','#fff3c4','#ee1515'];
+const FW_TEXTS = ['小陈天天开心','生日快乐！','笑一笑，十年少！','平安喜乐','万事顺遂',
+  '岁岁常欢愉','烟火年年，喜乐长安','春祺夏安','秋绥冬喜'];
+let fwCanvas, fwCtx, fwRunning=false, fwRAF=null, fwTimer=null;
+let fwParticles=[], fwRockets=[];
+function startFireworks(){
+  if(fwRunning) return;
+  fwRunning = true;
+  fwCanvas = document.getElementById('fwCanvas');
+  fwCtx = fwCanvas.getContext('2d');
+  resizeFw();
+  fwParticles=[]; fwRockets=[];
+  fwLoop();
+  setTimeout(()=>launchRocket(true), 350);   // 进场必炸一次文字
+  scheduleRocket();
+}
+function stopFireworks(){
+  fwRunning = false;
+  if(fwRAF) cancelAnimationFrame(fwRAF);
+  if(fwTimer) clearTimeout(fwTimer);
+  fwRAF = fwTimer = null;
+}
+function resizeFw(){
+  if(!fwCanvas) return;
+  fwCanvas.width = window.innerWidth;
+  fwCanvas.height = window.innerHeight;
+}
+function launchRocket(withText){
+  if(fwRockets.length >= 5) return;
+  const W = fwCanvas.width, H = fwCanvas.height;
+  const x = W*(0.2 + Math.random()*0.6);
+  const targetY = H*(0.18 + Math.random()*0.32);
+  fwRockets.push({
+    x, y:H, vy:-(H*0.013), targetY,
+    color:FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)],
+    text: withText ? FW_TEXTS[Math.floor(Math.random()*FW_TEXTS.length)] : null
+  });
+}
+function makeParticle(x,y,vx,vy,color,decay,size){
+  return {x,y,vx,vy,color,alpha:1,decay,size,isText:false};
+}
+let _textCanvas=null, _textCtx=null;
+function sampleTextPoints(text, cx, cy){
+  if(!_textCanvas){ _textCanvas=document.createElement('canvas'); _textCtx=_textCanvas.getContext('2d'); }
+  const octx=_textCtx;
+  const fontOf = s => 'bold '+s+'px "PingFang SC","Microsoft YaHei",sans-serif';
+  let fs = 96; octx.font = fontOf(fs);
+  const w0 = octx.measureText(text).width;
+  const maxW = Math.min(fwCanvas.width*0.78, 760);
+  if(w0 > maxW) fs = Math.max(40, Math.floor(fs * maxW / w0));
+  octx.font = fontOf(fs);
+  const w = Math.ceil(octx.measureText(text).width)+20;
+  const h = Math.ceil(fs*1.3)+20;
+  _textCanvas.width=w; _textCanvas.height=h;
+  octx.font = fontOf(fs); octx.textAlign='center'; octx.textBaseline='middle';
+  octx.clearRect(0,0,w,h); octx.fillStyle='#fff';
+  octx.fillText(text, w/2, h/2);
+  const data = octx.getImageData(0,0,w,h).data;
+  const pts=[]; const step = isMobile()?6:5;
+  for(let y=0;y<h;y+=step){
+    for(let x=0;x<w;x+=step){
+      if(data[(y*w+x)*4+3] > 128) pts.push({x: cx - w/2 + x, y: cy - h/2 + y});
+    }
+  }
+  return pts;
+}
+function sampleArr(arr, n){
+  const out=[], copy=arr.slice();
+  while(out.length<n && copy.length) out.push(copy.splice(Math.floor(Math.random()*copy.length),1)[0]);
+  return out;
+}
+function spawnTextParticles(text, cx, cy, baseColor){
+  const pts = sampleTextPoints(text, cx, cy);
+  if(!pts.length) return;
+  const maxP = isMobile() ? 240 : 480;
+  const chosen = pts.length > maxP ? sampleArr(pts, maxP) : pts;
+  for(const pt of chosen){
+    const ang = Math.random()*Math.PI*2, kick = Math.random()*3+1;
+    const col = Math.random()<0.3 ? FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)] : baseColor;
+    fwParticles.push({
+      x: cx + (Math.random()-0.5)*30, y: cy + (Math.random()-0.5)*30,
+      tx: pt.x, ty: pt.y,
+      vx: Math.cos(ang)*kick, vy: Math.sin(ang)*kick,
+      color: col, alpha: 1, isText: true,
+      decay: 0.004 + Math.random()*0.006, size: 1.4 + Math.random()*1.5,
+      flick: Math.random()*Math.PI*2
+    });
+  }
+}
+function explode(x, y, color, text){
+  const base = isMobile() ? 45 : 95;
+  const count = base + Math.floor(Math.random()*(isMobile()?22:48));
+  for(let i=0;i<count;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*4 + 1.6;
+    const useAlt = Math.random() < 0.25;
+    fwParticles.push(makeParticle(x,y,Math.cos(a)*sp, Math.sin(a)*sp,
+      useAlt ? FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)] : color,
+      0.010 + Math.random()*0.016, 1.6 + Math.random()*2.2));
+  }
+  const ring2 = Math.floor(count*0.55);
+  for(let i=0;i<ring2;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*2.4 + 0.6;
+    fwParticles.push(makeParticle(x,y,Math.cos(a)*sp, Math.sin(a)*sp,
+      FW_COLORS[Math.floor(Math.random()*FW_COLORS.length)],
+      0.013 + Math.random()*0.02, 1.2 + Math.random()*1.6));
+  }
+  if(text){ spawnTextParticles(text, x, y, color); }
+}
+function fwLoop(){
+  if(!fwRunning) return;
+  fwRAF = requestAnimationFrame(fwLoop);
+  const ctx = fwCtx, W = fwCanvas.width, H = fwCanvas.height;
+  // 用 destination-out 擦除旧粒子（形成拖尾，不重绘全屏）
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation = 'lighter';
+  // 火箭
+  for(let i=fwRockets.length-1;i>=0;i--){
+    const r = fwRockets[i];
+    r.y += r.vy; r.vy *= 0.992;
+    ctx.globalAlpha = 0.9; ctx.fillStyle = r.color;
+    ctx.beginPath(); ctx.arc(r.x, r.y, 2, 0, 7); ctx.fill();
+    if(r.y <= r.targetY){ explode(r.x, r.y, r.color, r.text); fwRockets.splice(i,1); }
+  }
+  // 粒子（含「由烟火余烬组成的文字」）
+  for(let i=fwParticles.length-1;i>=0;i--){
+    const p = fwParticles[i];
+    if(p.isText){
+      p.vx *= 0.88; p.vy *= 0.88;
+      p.x += p.vx + (p.tx - p.x)*0.12;
+      p.y += p.vy + (p.ty - p.y)*0.12;
+      p.flick += 0.3; p.alpha -= p.decay;
+    } else {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.025; p.vx *= 0.99; p.vy *= 0.99;
+      p.alpha -= p.decay;
+    }
+    if(p.alpha <= 0){ fwParticles.splice(i,1); continue; }
+    ctx.globalAlpha = Math.max(0, p.alpha) * (p.isText ? (0.6 + 0.4*Math.sin(p.flick)) : 1);
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function scheduleRocket(){
+  if(!fwRunning) return;
+  const delay = 1100 + Math.random()*500;
+  fwTimer = setTimeout(()=>{
+    const n = Math.random()<0.6 ? 2 : (Math.random()<0.35 ? 3 : 1);
+    for(let k=0;k<n;k++) launchRocket(Math.random() < 0.12);
+    scheduleRocket();
+  }, delay);
+}
+/* 烟花自动循环播放，无需手动按钮 */
+
+/* =========================================================
+   模块二：今日运势（抽签）
+   ========================================================= */
+const levels = [
+  { name: "传说降临", color: "#FFD700" },
+  { name: "闪光时刻", color: "#B388FF" },
+  { name: "天选之人", color: "#EE1515" },
+  { name: "欧气爆棚", color: "#FF9F1C" },
+  { name: "元气满满", color: "#FFD93D" },
+  { name: "好运连连", color: "#FF6B6B" },
+  { name: "稳稳当当", color: "#3B8EF0" },
+  { name: "小确幸", color: "#FF8FB1" },
+  { name: "岁月静好", color: "#7BC67E" },
+  { name: "蓄力待发", color: "#8BC34A" },
+  { name: "静待花开", color: "#C5A3FF" },
+  { name: "慢慢来", color: "#87CEEB" },
+  { name: "平静如常", color: "#8A9BA8" },
+  { name: "安然无恙", color: "#B0A8A0" }
+];
+
+const pokemons = [
+  "皮卡丘", "伊布", "梦幻", "基拉祈", "谢米", "波克比", 
+  "胖丁", "时拉比", "玛夏多", "七夕青鸟", "杰尼龟", "妙蛙种子", 
+  "六尾", "卡比兽", "仙子伊布", "谜拟丘", "木木枭", "莫鲁贝可", 
+  "利欧路", "拉帝亚斯", "皮丘"
+];
+
+const colors = [
+  "电气黄", "奶油棕", "梦幻紫", "星光银", "薄荷绿", 
+  "幸福金", "樱花粉", "森林绿", "暗夜蓝", "天空蓝", 
+  "水蓝", "草绿", "炽焰红", "慵懒蓝", "梦幻粉", 
+  "幽灵紫", "电光黄", "波导蓝", "水都蓝", "淡黄"
+];
+
+const numbers = [
+  25, 133, 151, 385, 492, 175, 39, 251, 802, 
+  334, 7, 1, 37, 143, 700, 778, 722, 877, 
+  447, 380, 172
+];
+
+const goods = [
+  "和朋友分享快乐", "尝试新鲜事物", "冥想发呆", "写下心愿", "亲近自然", 
+  "拥抱朋友", "听一首好歌", "回忆美好", "独处思考", "仰望天空", 
+  "放松休息", "晒太阳", "展现热情", "好好睡觉", "表达爱意", 
+  "反内耗", "学习新知识", "吃顿好的", "坚持目标", "旅行冒险", 
+  "结交新朋友"
+];
+
+const bads = [
+  "自我怀疑", "犹豫不决", "过度焦虑", "自我否定", "宅家太久", 
+  "封闭内心", "生闷气", "纠结过去", "冲动行事", "失去信心", 
+  "急躁", "熬夜", "冷漠", "过度劳累", "冷暴力", 
+  "讨好别人", "拖延", "饿肚子", "半途而废", "止步不前", 
+  "害羞退缩"
+];
+
+const messages = [
+  "愿你像宝可梦一样勇敢，去探索未知的世界。",
+  "今天也要元气满满，像阳光一样温暖。",
+  "你值得所有的美好，请相信自己。",
+  "慢慢来，一切都会是最好的安排。",
+  "你比想象中更强大，加油！",
+  "愿你被这个世界温柔以待。",
+  "小小的进步也是进步，不要小看自己。",
+  "生活明朗，万物可爱，你也是。",
+  "保持热爱，奔赴山海。",
+  "今天也要开心哦！",
+  "每一个不曾起舞的日子，都是对生命的辜负。",
+  "你的存在本身就是一种美好。",
+  "未来可期，万事胜意。",
+  "愿你眼里有光，心中有爱。",
+  "做自己，因为别人都有人做了。",
+  "要像星星一样，闪闪发光。",
+  "一切都会好起来的，你也是。",
+  "请保持那一份热爱，奔赴下一场山海。",
+  "愿你成为自己的太阳，无需凭借谁的光。",
+  "生活总会给你答案，但不会马上把一切告诉你。",
+  "你要悄悄拔尖，然后惊艳所有人。",
+  "余生很长，何必慌张。",
+  "愿你历经山河，仍觉得人间值得。",
+  "你一定要站在自己所热爱的世界里，闪闪发亮。",
+  "愿你所有的努力都不被辜负。"
+];
+
+const FORTUNE_KEY = 'birthday_fortune_v1';
+function fortuneDateStr(){
+  const d = new Date(); const p = n => (n<10?'0':'')+n;
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+}
+function loadFortune(){
+  try { return JSON.parse(localStorage.getItem(FORTUNE_KEY) || '[]'); } catch(e){ return []; }
+}
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function startFortune(){
+  const today = fortuneDateStr();
+  const hist = loadFortune();
+  const entry = hist.find(h => h.date === today);
+  const drawBtn = document.getElementById('drawBtn');
+  const msg = document.getElementById('fortuneMsg');
+  const card = document.getElementById('fcard');
+  if(entry){
+    drawBtn.style.display = 'none';
+    msg.textContent = '今天已经抽过啦，明天再来～';
+    renderFortuneCard(entry.slip);
+  } else {
+    drawBtn.style.display = '';
+    msg.textContent = '';
+    card.classList.remove('show');
+    card.innerHTML = '';
+  }
+}
+function drawFortune(){
+  const today = fortuneDateStr();
+  if(loadFortune().find(h => h.date === today)){
+    toast('今天已经抽过啦，明天再来～');
+    startFortune();
+    return;
+  }
+  const tube = document.getElementById('tube');
+  tube.classList.add('shake');
+  setTimeout(()=>tube.classList.remove('shake'), 1200);
+  setTimeout(()=>{
+    const slip = {
+      level: pick(levels),
+      poke: pick(pokemons),
+      color: pick(colors),
+      num: pick(numbers),
+      yi: pick(goods),
+      ji: pick(bads),
+      word: pick(messages)
+    };
+    const hist = loadFortune();
+    hist.push({
+      id: Date.now() + '-' + Math.floor(Math.random()*1e6),
+      date: today,
+      time: new Date().toLocaleString('zh-CN'),
+      slip: slip
+    });
+    localStorage.setItem(FORTUNE_KEY, JSON.stringify(hist));
+    document.getElementById('drawBtn').style.display = 'none';
+    document.getElementById('fortuneMsg').textContent = '今天已经抽过啦，明天再来～';
+    renderFortuneCard(slip);
+  }, 1250);
+}
+function renderFortuneCard(s){
+  const card = document.getElementById('fcard');
+  card.innerHTML =
+    '<div class="flevel" style="color:'+s.level.color+'">'+esc(s.level.name)+'</div>'
+    + '<div class="frow"><span class="flabel">幸运宝可梦</span><span class="fval">'+esc(s.poke)+'</span></div>'
+    + '<div class="frow"><span class="flabel">幸运色</span><span class="fval">'+esc(s.color)+'</span></div>'
+    + '<div class="frow"><span class="flabel">幸运数字</span><span class="fval">'+esc(String(s.num))+'</span></div>'
+    + '<div class="frow"><span class="flabel">宜</span><span class="fval">'+esc(s.yi)+'</span></div>'
+    + '<div class="frow"><span class="flabel">忌</span><span class="fval">'+esc(s.ji)+'</span></div>'
+    + '<div class="fword">「'+esc(s.word)+'」</div>'
+    + '<div class="fbts"><button class="btn fhistory-btn" onclick="openFortuneHistory()">查看历史记录</button></div>';
+  card.classList.add('show');
+}
+function openFortuneHistory(){
+  const arr = loadFortune();
+  let html = arr.length ? '' : '<div class="hist-item">还没有抽签记录哦～</div>';
+  arr.slice().reverse().forEach(h=>{
+    const s = h.slip;
+    html += '<div class="hist-item">'
+      + '<div class="hist-top"><b>'+esc(h.date)+'</b><span class="hist-time">'+esc(h.time)+'</span>'
+      + '<button class="hist-del" onclick="deleteFortune(\''+h.id+'\')">×</button></div>'
+      + '<div class="hist-sum" style="color:'+s.level.color+'">'+esc(s.level.name)+'</div>'
+      + '<div class="hist-sub">'+esc(s.poke)+' ｜ '+esc(s.color)+' ｜ 数字'+esc(String(s.num))+'</div>'
+      + '<div class="hist-sub">宜：'+esc(s.yi)+'　忌：'+esc(s.ji)+'</div>'
+      + '<div class="hist-word">'+esc(s.word)+'</div></div>';
+  });
+  openModal('抽签历史记录', html);
+}
+function deleteFortune(id){
+  if(!confirm('确定要删除这条抽签记录吗？')) return;
+  const arr = loadFortune().filter(h => h.id !== id);
+  localStorage.setItem(FORTUNE_KEY, JSON.stringify(arr));
+  toast('已删除');
+  openFortuneHistory();
+}
+
+/* =========================================================
+   模块三：小小相册
+   ========================================================= */
+let albumPage = 0;
+let uploads = JSON.parse(localStorage.getItem('album_uploads') || '[]');
+function allPhotos(){
+  // 初始 6 张（album1~6.jpg 或上传中心替换过的）+ 朋友上传（上传的排在后面，可被删除）
+  return resolvedInitialPhotos().concat(uploads);
+}
+function buildAlbum(){
+  const photos = allPhotos();
+  const initialCount = resolvedInitialPhotos().length;   // 初始 6 张不可删除
+  const totalPages = Math.max(1, Math.ceil(photos.length / 4));
+  if(albumPage >= totalPages) albumPage = totalPages - 1;
+  if(albumPage < 0) albumPage = 0;
+  const start = albumPage * 4;
+  fillPage('pageL', photos.slice(start, start+2), start, initialCount);
+  fillPage('pageR', photos.slice(start+2, start+4), start+2, initialCount);
+  document.getElementById('pageInd').textContent = '第 '+(albumPage+1)+' / '+totalPages+' 页';
+}
+function fillPage(id, list, startIndex, initialCount){
+  const page = document.getElementById(id);
+  const base = startIndex || 0;
+  page.innerHTML = '';
+  for(let i=0;i<2;i++){
+    const slot = document.createElement('div'); slot.className='photo';
+    const gi = base + i;                                 // 该照片在所有照片中的全局序号
+    if(list[i]){
+      const raw = list[i];
+      const img = document.createElement('img');
+      img.src = raw; img.alt = 'photo'; img.loading = 'lazy';
+      // 本地文件缺失时回退到占位图，避免碎图
+      if(typeof raw === 'string' && !raw.startsWith('data:') && !raw.startsWith('blob:')){
+        img.onerror = ()=>{ img.onerror = null; img.src = placeholder('照片 '+(gi+1),'#aee3ff','#c9a8ff'); };
+      }
+      img.onclick = ()=>openLightbox(raw);
+      slot.appendChild(img);
+      // 上传的照片（排在初始 6 张之后）显示删除按钮
+      if(gi >= initialCount){
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'pdel';
+        del.title = '删除这张照片';
+        del.textContent = '×';
+        del.onclick = (ev)=>{ ev.stopPropagation(); deleteUpload(gi); };
+        slot.appendChild(del);
+      }
+    }else{
+      slot.innerHTML = '<span style="color:#bba;">空位</span>';
+    }
+    page.appendChild(slot);
+  }
+}
+/* 删除「上传照片」里的一张（初始 6 张不可删除） */
+function deleteUpload(globalIndex){
+  if(!confirm('确定要删除这张照片吗？删除后无法恢复哦～')) return;
+  const initialCount = resolvedInitialPhotos().length;
+  const idx = globalIndex - initialCount;
+  if(idx < 0 || idx >= uploads.length){ toast('这张照片不可删除'); return; }
+  uploads.splice(idx, 1);
+  try{
+    localStorage.setItem('album_uploads', JSON.stringify(uploads));
+  }catch(e){ toast('删除失败'); return; }
+  buildAlbum();
+  toast('已删除');
+}
+function prevPage(){ albumPage--; if(albumPage<0) albumPage=0; buildAlbum(); }
+function nextPage(){ albumPage++; buildAlbum(); }
+function onUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  compressImg(file, data=>{
+    uploads.push(data);
+    localStorage.setItem('album_uploads', JSON.stringify(uploads));
+    buildAlbum();
+    toast('照片已保存，刷新也不丢啦～');
+  });
+  e.target.value = '';
+}
+function compressImg(file, cb){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let w = img.width, h = img.height, max = 1000;
+      if(w>max || h>max){ const r = Math.min(max/w, max/h); w=w*r; h=h*r; }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(cv.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+function buildPetals(){
+  const box = document.getElementById('petals');
+  const items = ['🌸','🌼','🍃','🌺','💮','🍂'];
+  const N = isMobile() ? 12 : 20;
+  for(let i=0;i<N;i++){
+    const p = document.createElement('div'); p.className='petal';
+    p.textContent = items[Math.floor(Math.random()*items.length)];
+    p.style.left = Math.random()*100+'%';
+    p.style.animationDuration = (7 + Math.random()*7)+'s';
+    p.style.animationDelay = (-Math.random()*10)+'s';
+    p.style.fontSize = (12 + Math.random()*10)+'px';
+    box.appendChild(p);
+  }
+}
+
+/* =========================================================
+   模块四：记录本（私人朋友圈 + 自己评论自己）
+   ========================================================= */
+const BIRTH = new Date(2006, 5, 14); // 2006-06-14
+const PROFILE_KEY = 'birthday_profile_v1';
+const MOMENTS_KEY = 'birthday_moments_v1';
+
+let profile = loadProfile();
+let moments = loadMoments();
+let draftImages = [];   // 发表区已选图片 base64
+let emojiOpen = false;
+
+function loadProfile(){
+  try{ const p = JSON.parse(localStorage.getItem(PROFILE_KEY)); if(p && p.nickname) return p; }catch(e){}
+  return { avatar: emojiAvatar('🐭'), nickname:'哈基陈', signature:'今天也要元气满满！' };
+}
+function saveProfile(){
+  try{ localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
+  catch(e){ toast('存储空间不足，无法保存资料'); }
+}
+function loadMoments(){
+  try{ return JSON.parse(localStorage.getItem(MOMENTS_KEY)) || []; }catch(e){ return []; }
+}
+function saveMoments(){
+  try{ localStorage.setItem(MOMENTS_KEY, JSON.stringify(moments)); }
+  catch(e){
+    if(e && (e.name==='QuotaExceededError' || e.code===22)) toast('存储空间不足，请删除一些旧动态或减少图片数量');
+    else toast('保存失败，请重试');
+  }
+}
+
+function startRecord(){
+  buildBookStars();
+  renderProfile();
+  renderMoments();
+  renderCalendar();
+  draftImages = [];
+  document.getElementById('postText').value = '';
+  document.getElementById('postCount').textContent = '0';
+  document.getElementById('postThumbs').innerHTML = '';
+  closeEmoji();
+}
+function stopRecord(){}
+
+function renderProfile(){
+  document.getElementById('pfAvatar').src = profile.avatar;
+  document.getElementById('postAvatar').src = profile.avatar;
+  document.getElementById('pfName').textContent = profile.nickname;
+  document.getElementById('pfSig').textContent = profile.signature;
+  document.getElementById('pfSig2').textContent = profile.signature;
+  document.getElementById('postNick').value = profile.nickname;
+  document.getElementById('daysCount2').textContent = Math.floor((Date.now() - BIRTH.getTime())/86400000);
+  const nowEl = document.getElementById('tlNow');
+  if(nowEl){ const n=new Date(); const p=x=>(x<10?'0':'')+x; nowEl.textContent = n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate()); }
+}
+
+function buildBookStars(){
+  const box = document.getElementById('bookStars');
+  if(box.childElementCount) return;
+  const N = isMobile() ? 10 : 16;
+  for(let i=0;i<N;i++){
+    const s = document.createElement('div'); s.className='star2';
+    s.textContent = Math.random()<0.5 ? '★' : '✦';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.fontSize = (12 + Math.random()*16)+'px';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    box.appendChild(s);
+  }
+}
+
+/* 头像上传：压缩到 200x200 以内 */
+function changeAvatar(input){
+  const f = input.files && input.files[0]; input.value = '';
+  if(!f) return;
+  compressTo(f, 200, 0.85, data=>{
+    profile.avatar = data; saveProfile(); renderProfile();
+    toast('头像已更新～');
+  });
+}
+function editNickname(){
+  const v = prompt('修改昵称（1-12 字）：', profile.nickname);
+  if(v === null) return;
+  const t = v.trim();
+  if(!t){ toast('昵称不能为空哦'); return; }
+  if(t.length > 12){ toast('昵称最多 12 个字'); return; }
+  profile.nickname = t; saveProfile(); renderProfile();
+}
+function editSignature(){
+  const v = prompt('修改个性签名：', profile.signature);
+  if(v === null) return;
+  profile.signature = (v.trim() || '今天也要元气满满！'); saveProfile(); renderProfile();
+}
+
+/* 通用图片压缩 */
+function compressTo(file, maxEdge, quality, cb){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let w = img.width, h = img.height;
+      const r = Math.min(1, maxEdge / Math.max(w, h));
+      w = Math.round(w * r); h = Math.round(h * r);
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(cv.toDataURL('image/jpeg', quality));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* 字数统计 */
+document.getElementById('postText').addEventListener('input', function(){
+  document.getElementById('postCount').textContent = this.value.length;
+});
+/* 「发言人」输入框 = 昵称编辑（失焦时校验并保存） */
+document.getElementById('postNick').addEventListener('input', function(){
+  const v = this.value.trim();
+  document.getElementById('pfName').textContent = v || profile.nickname;
+});
+document.getElementById('postNick').addEventListener('blur', function(){
+  let v = this.value.trim();
+  if(!v) v = profile.nickname;
+  if(v.length > 12) v = v.slice(0, 12);
+  this.value = v;
+  profile.nickname = v; saveProfile();
+  document.getElementById('pfName').textContent = v;
+});
+
+/* emoji 面板 */
+const EMOJI_GROUPS = {
+  '表情':['😀','😁','😂','🤣','😊','😇','🙂','😉','😍','🥰','😘','😜','🤪','🤗','🤔','😴','🥳','😭','😅'],
+  '爱心':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','💖','💗','💓','💕','💞','💘'],
+  '动物':['🐱','🐶','🐰','🐻','🐼','🐨','🦊','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦'],
+  '星星':['✨','⭐','🌟','💫','🌠','🌙','☀️','🌈'],
+  '食物':['🍎','🍓','🍒','🍑','🍉','🍰','🎂','🍭','🍬','🍫','🧁','🍩']
+};
+function buildEmojiPanel(){
+  const p = document.getElementById('emojiPanel');
+  let html = '';
+  for(const g in EMOJI_GROUPS){
+    html += '<div style="width:100%;font-size:12px;color:var(--text-soft);margin:2px 0;">'+g+'</div>';
+    EMOJI_GROUPS[g].forEach(e=>{ html += '<span onclick="insertEmoji(\''+e+'\')">'+e+'</span>'; });
+  }
+  p.innerHTML = html;
+}
+function toggleEmoji(){
+  const p = document.getElementById('emojiPanel');
+  emojiOpen = !emojiOpen;
+  if(emojiOpen && !p.childElementCount) buildEmojiPanel();
+  p.style.display = emojiOpen ? 'flex' : 'none';
+}
+function closeEmoji(){ emojiOpen = false; document.getElementById('emojiPanel').style.display = 'none'; }
+function insertEmoji(e){
+  const ta = document.getElementById('postText');
+  const s = ta.selectionStart, en = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + e + ta.value.slice(en);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = s + e.length;
+  document.getElementById('postCount').textContent = ta.value.length;
+}
+
+/* 图片上传：最多 9 张，压缩最长边 1200 */
+function addImages(input){
+  const files = Array.from(input.files || []); input.value = '';
+  if(!files.length) return;
+  if(draftImages.length >= 9){ toast('最多只能发 9 张图片哦～'); return; }
+  if(draftImages.length + files.length > 9) toast('最多只能发 9 张图片哦～');
+  const remain = Math.min(files.length, 9 - draftImages.length);
+  let done = 0;
+  files.slice(0, remain).forEach(f=>{
+    compressTo(f, 1200, 0.8, data=>{
+      draftImages.push(data); renderDraft();
+      if(++done === remain) toast('已添加图片（共 '+draftImages.length+'/9）');
+    });
+  });
+}
+function renderDraft(){
+  const box = document.getElementById('postThumbs'); box.innerHTML = '';
+  draftImages.forEach((src, i)=>{
+    const d = document.createElement('div'); d.className = 'thumb';
+    d.innerHTML = '<img src="'+src+'" alt=""><span class="x" onclick="removeDraft('+i+')">×</span>';
+    box.appendChild(d);
+  });
+}
+function removeDraft(i){ draftImages.splice(i, 1); renderDraft(); }
+
+/* 发表 */
+function publishMoment(){
+  const ta = document.getElementById('postText');
+  const text = ta.value.trim();
+  if(!text && !draftImages.length){ toast('写点什么或加张图再发表吧～'); return; }
+  const m = {
+    id: Date.now() + '' + Math.floor(Math.random()*1000),
+    time: Date.now(),
+    text: text,
+    images: draftImages.slice(),
+    comments: []
+  };
+  moments.unshift(m);
+  try{ localStorage.setItem(MOMENTS_KEY, JSON.stringify(moments)); }
+  catch(e){
+    moments.shift();
+    if(e && (e.name==='QuotaExceededError' || e.code===22)) toast('存储空间不足，请删除一些旧动态或减少图片数量');
+    else toast('发表失败，请重试');
+    return;
+  }
+  ta.value = ''; draftImages = [];
+  document.getElementById('postCount').textContent = '0';
+  document.getElementById('postThumbs').innerHTML = '';
+  renderMoments();
+  toast('发表成功啦～ 🎉');
+}
+
+/* 渲染动态列表（论坛贴子式，倒序最新在上，评论区常显） */
+function renderMoments(){
+  const box = document.getElementById('momentsList');
+  if(!moments.length){ box.innerHTML = '<div class="empty-tip">还没有发表过内容，快来记录第一条吧～</div>'; return; }
+  box.innerHTML = moments.map(m=>{
+    const imgs = (m.images && m.images.length) ?
+      '<div class="pc-grid g'+m.images.length+'">' +
+      m.images.map(s=>'<img src="'+s+'" onclick="openLightbox(\''+s+'\')" alt="">').join('') + '</div>' : '';
+    const cmts = (m.comments||[]).map((c, i)=>{
+      return '<div class="cmt-item">'
+        + '<img class="cmt-ava" src="'+profile.avatar+'">'
+        + '<div class="cmt-body"><div class="cmeta"><b>'+esc(profile.nickname)+'</b> · '+fmtTime(c.time)
+        + '<button class="cmt-del" onclick="deleteComment(\''+m.id+'\','+i+')">×</button></div>'
+        + '<div class="ctext">'+esc(c.text)+'</div></div></div>';
+    }).join('');
+    const cnt = (m.comments?m.comments.length:0);
+    return '<div class="post-card">'
+      + '<div class="pc-head"><img class="pc-ava" src="'+profile.avatar+'">'
+        + '<div class="pc-who"><span class="pc-name">'+esc(profile.nickname)+'</span>'
+        + '<span class="pc-time">'+fmtTime(m.time)+'</span></div></div>'
+      + '<div class="pc-text">'+esc(m.text)+'</div>'
+      + imgs
+      + '<div class="pc-actions">'
+        + '<button class="act-btn" onclick="toggleComments(\''+m.id+'\')">💬 评论 <span class="cnt">'+cnt+'</span></button>'
+        + '<button class="act-btn del" onclick="deleteMoment(\''+m.id+'\')">🗑️ 删除</button>'
+      + '</div>'
+      + '<div class="cmt-wrap" id="cmt-'+m.id+'">'
+        + cmts
+        + '<div class="cmt-form">'
+          + '<img class="cmt-ava" src="'+profile.avatar+'">'
+          + '<input class="cinput" id="ci-'+m.id+'" placeholder="写条评论…" maxlength="200" onkeydown="if(event.key===\'Enter\')addComment(\''+m.id+'\')">'
+          + '<button class="cbtn" onclick="addComment(\''+m.id+'\')">发送</button>'
+        + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+function toggleComments(id){
+  const el = document.getElementById('cmt-'+id);
+  if(el) el.classList.toggle('open');
+}
+
+/* ===== 每日心情日历 ===== */
+const MOOD_KEY = 'birthday_moods_v1';
+let moods = {};
+try{ moods = JSON.parse(localStorage.getItem(MOOD_KEY)) || {}; }catch(e){ moods = {}; }
+let calY = new Date().getFullYear(), calM = new Date().getMonth();
+const MOOD_EMOJIS = ['😀','😁','😂','🥰','😍','🤔','😴','🥳','😭','😅','❤️','✨','⭐','🌈','🌸','🍰'];
+function moodKey(y,m,d){ return y+'-'+m+'-'+d; }
+function saveMoods(){ try{ localStorage.setItem(MOOD_KEY, JSON.stringify(moods)); }catch(e){} }
+let selKey = '';   // 当前点击选中的日期（'年-月-日'），用于浅灰高亮
+function renderCalendar(){
+  const tEl = document.getElementById('calTitle');
+  if(tEl) tEl.textContent = calY+'年 '+(calM+1)+'月';
+  const grid = document.getElementById('calGrid');
+  if(!grid) return;
+  const first = new Date(calY, calM, 1).getDay();
+  const days = new Date(calY, calM+1, 0).getDate();
+  const now = new Date();
+  const tY = now.getFullYear(), tM = now.getMonth(), tD = now.getDate();
+  let html = '';
+  for(let i=0;i<first;i++) html += '<span class="cal-cell empty"></span>';
+  for(let d=1; d<=days; d++){
+    const k  = moodKey(calY, calM, d);
+    const em = moods[k];
+    const isToday = (calY === tY && calM === tM && d === tD);
+    const cls = 'cal-cell day'
+      + (em ? ' has-mood' : '')
+      + (isToday ? ' today' : '')
+      + (k === selKey ? ' selected' : '');
+    html += '<button type="button" class="'+cls+'" data-key="'+k+'" onclick="openMoodPicker(event,'+calY+','+calM+','+d+')">'
+      + '<span class="cal-num">'+d+'</span>'
+      + (em ? '<span class="cal-mood">'+em+'</span>' : '')
+      + '</button>';
+  }
+  grid.innerHTML = html;
+}
+/* 切换选中日期的高亮（只换 class，不整表重绘，避免弹窗错位） */
+function setSelected(key){
+  selKey = key;
+  document.querySelectorAll('.cal-cell.selected').forEach(el=>el.classList.remove('selected'));
+  const el = document.querySelector('.cal-cell[data-key="'+key+'"]');
+  if(el) el.classList.add('selected');
+}
+function prevMonth(){ calM--; if(calM<0){ calM=11; calY--; } renderCalendar(); }
+function nextMonth(){ calM++; if(calM>11){ calM=0; calY++; } renderCalendar(); }
+function openMoodPicker(ev, y, m, d){
+  ev.stopPropagation();
+  setSelected(moodKey(y, m, d));      // 被点击的日期加浅灰高亮
+  const p = document.getElementById('moodPicker');
+  if(!p) return;
+  let html = '';
+  MOOD_EMOJIS.forEach(e=>{ html += '<span onclick="setMood('+y+','+m+','+d+',\''+e+'\')">'+e+'</span>'; });
+  html += '<span class="mood-clear" onclick="clearMood('+y+','+m+','+d+')">清除</span>';
+  p.innerHTML = html;
+  p.style.display = 'flex';
+  const r = ev.currentTarget.getBoundingClientRect();
+  p.style.top = (r.bottom + 6) + 'px';
+  p.style.left = Math.min(r.left, window.innerWidth - 230) + 'px';
+}
+function closeMoodPicker(){ const p=document.getElementById('moodPicker'); if(p) p.style.display='none'; }
+function setMood(y,m,d,em){ moods[moodKey(y,m,d)] = em; saveMoods(); renderCalendar(); closeMoodPicker(); }
+function clearMood(y,m,d){ delete moods[moodKey(y,m,d)]; saveMoods(); renderCalendar(); closeMoodPicker(); }
+document.addEventListener('click', function(e){
+  const p = document.getElementById('moodPicker');
+  if(p && p.style.display!=='none' && !p.contains(e.target) && !e.target.closest('.cal-cell')) closeMoodPicker();
+});
+function addComment(id){
+  const input = document.getElementById('ci-'+id); if(!input) return;
+  const v = input.value.trim(); if(!v){ toast('写点评论再发送吧～'); return; }
+  const m = moments.find(x=>x.id===id); if(!m) return;
+  m.comments = m.comments || [];
+  m.comments.push({ time: Date.now(), text:v });
+  try{ localStorage.setItem(MOMENTS_KEY, JSON.stringify(moments)); }
+  catch(e){ m.comments.pop(); toast('存储空间不足，无法保存评论'); return; }
+  renderMoments();
+  const el = document.getElementById('ci-'+id); if(el) el.focus();
+}
+function deleteComment(id, idx){
+  if(!confirm('确定删除这条评论吗？')) return;
+  const m = moments.find(x=>x.id===id); if(!m) return;
+  m.comments.splice(idx, 1);
+  localStorage.setItem(MOMENTS_KEY, JSON.stringify(moments));
+  renderMoments();
+}
+function deleteMoment(id){
+  if(!confirm('确定删除这条动态吗？评论也会一起消失哦～')) return;
+  moments = moments.filter(x=>x.id !== id);
+  try{ localStorage.setItem(MOMENTS_KEY, JSON.stringify(moments)); }
+  catch(e){ toast('删除失败'); return; }
+  renderMoments();
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtTime(ts){
+  const d = new Date(ts), p = n => (n<10?'0':'')+n;
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+/* =========================================================
+   弹窗 / 灯箱
+   ========================================================= */
+function openModal(title, bodyHtml){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('show'); }
+
+/* =========================================================
+   碎碎念（Y2K 小窗口，固定文本仅供查看）
+   ========================================================= */
+function openWhisper(){ document.getElementById('whisperOverlay').classList.add('show'); }
+function closeWhisper(){ document.getElementById('whisperOverlay').classList.remove('show'); }
+
+/* =========================================================
+   初始化
+   ========================================================= */
+function buildFwSky(){
+  const sky = document.getElementById('fwSky');
+  if(!sky || sky.childElementCount) return;
+  const N = isMobile() ? 60 : 110;
+  for(let i=0;i<N;i++){
+    const s = document.createElement('div'); s.className='fw-star';
+    const size = 1 + Math.random()*2.2;
+    s.style.width = size+'px'; s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*2.6)+'s';
+    s.style.animationDuration = (2 + Math.random()*2.5)+'s';
+    if(Math.random()<0.3){ s.style.background='#ffe9a8'; s.style.boxShadow='0 0 6px rgba(255,220,140,0.9)'; }
+    sky.appendChild(s);
+  }
+  const shootN = isMobile() ? 1 : 3;
+  for(let i=0;i<shootN;i++){
+    const m = document.createElement('div'); m.className='fw-shoot';
+    m.style.left = (8 + Math.random()*55)+'%';
+    m.style.top = (4 + Math.random()*35)+'%';
+    m.style.animationDelay = (Math.random()*5)+'s';
+    sky.appendChild(m);
+  }
+}
+function init(){
+  buildBackground();
+  buildFwSky();
+  buildCandles();
+  buildPetals();
+  buildAlbum();
+  updateBgmButtons();
+  window.addEventListener('resize', ()=>{ if(fwRunning) resizeFw(); });
+}
+init();
+</script>
+
+</body>
+</html>
